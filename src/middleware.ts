@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
     if (token.role === 'admin') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     } else {
-      return NextResponse.redirect(new URL('/account', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 
