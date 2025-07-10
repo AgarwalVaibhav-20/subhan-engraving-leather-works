@@ -42,7 +42,7 @@ export default function VerifyPage() {
     try {
       await axios.post('/api/verify-otp', {
         email,
-        code: data.otp,
+        otp: data.otp,
       })
 
       toast.success('Email verified! Redirecting to login...')
