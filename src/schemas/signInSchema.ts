@@ -1,6 +1,6 @@
 import {z} from 'zod';
 
 export const signInVerification = z.object({
-    identifier:z.string(),
+    email:z.string(),
     password:z.string(),
 })
