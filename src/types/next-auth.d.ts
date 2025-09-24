@@ -1,10 +1,10 @@
-// types/next-auth.d.ts or wherever you keep this file
 import 'next-auth';
 import 'next-auth/jwt';
 
 declare module 'next-auth' {
   interface User {
     _id?: string;
+    profileImage?:string;
     isVerified?: boolean;
     isAcceptingMessages?: boolean;
     email?: string;
@@ -15,6 +15,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       _id?: string;
+      profileImage?:string;
       isVerified?: boolean;
       isAcceptingMessages?: boolean;
       email?: string;
@@ -27,6 +28,7 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     _id?: string;
+    profileImage?:string;
     isVerified?: boolean;
     isAcceptingMessages?: boolean;
     email?: string;

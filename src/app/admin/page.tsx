@@ -9,11 +9,6 @@ export default function AdminLayout() {
   useEffect(() => {
     router.replace('/admin/dashboard');
   }, [router]);
-
   return null;
-  return (
-    <div className="flex  bg-gray-50">
-    </div>
-  );
 }
 

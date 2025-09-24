@@ -74,10 +74,10 @@ export default function VerifyPage() {
     duration: 3000,
   }} />
 
-      <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+      <div className="flex items-center justify-center min-h-screen 7 px-4">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
-            <CardTitle>Verify Your Email</CardTitle>
+            <CardTitle className='text-center'>Verify Your Email</CardTitle>
           </CardHeader>
           <CardContent>
             {email && (

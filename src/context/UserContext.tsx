@@ -8,6 +8,7 @@ type UserType = {
   email?: string;
   fullname?: string;
   isVerified?: boolean;
+  profileImage?: string;
   isAcceptingMessages?: boolean;
   role?: 'admin' | 'user';
 };

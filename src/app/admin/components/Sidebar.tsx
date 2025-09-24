@@ -1,5 +1,4 @@
 'use client';
-
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
@@ -19,9 +18,10 @@ const menuItems = [
   { id: 'orders', label: 'Orders', icon: ShoppingCart, route: '/admin/orders' },
   { id: 'products', label: 'Products', icon: Package, route: '/admin/products' },
   { id: 'upload', label: 'Upload Product', icon: Upload, route: '/admin/uploads' },
-  { id: 'customers', label: 'Customers', icon: Users, route: '/admin/customers' },
+  { id: 'customers', label: 'Customers', icon: Users, route: '/admin/customer' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, route: '/admin/analytics' },
   { id: 'settings', label: 'Settings', icon: Settings, route: '/admin/settings' },
+  {id:'main page' , label:"Main page" , icon:Home , route:'/'}
 ];
 
 const AdminSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
@@ -70,7 +70,7 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
     <div
       className={`
         bg-white border-r border-gray-200 
-        h-full z-50
+        h-screen z-50
         ${isCollapsed ? 'w-20' : 'w-64'}
         transition-[width] duration-300 ease-in-out
 

@@ -61,14 +61,14 @@ const LoginPage = () => {
     }
   }
 
-  if (session) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
-        <p className="text-xl font-mono">Signed in as {session.user?.email}</p>
-        <Button onClick={() => signOut()}>Sign out</Button>
-      </div>
-    )
-  }
+  // if (session) {
+  //   return (
+  //     <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
+  //       <p className="text-xl font-mono">Signed in as {session.user?.email}</p>
+  //       <Button onClick={() => signOut()}>Sign out</Button>
+  //     </div>
+  //   )
+  // }
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">

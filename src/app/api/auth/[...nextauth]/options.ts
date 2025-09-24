@@ -43,10 +43,12 @@ export const authOptions: NextAuthOptions = {
           if (!isPasswordCorrect) {
             throw new Error("Incorrect Password");
           }
-
+           user.isloggedIn = true;
+    await user.save();
           return {
             _id: user._id.toString(),
             email: user.email,
+            profileImage:user?.profileImage,
             fullname: user.fullname,
             isVerified: user.isVerified,
             isAcceptingMessages: user.isAcceptingMessages,
@@ -66,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.fullname = user.fullname;
         token.isVerified = user.isVerified;
+        token.profileImage = user?.profileImage;
         token.isAcceptingMessages = user.isAcceptingMessages;
         token.role = user.role || "user";
       }
@@ -77,6 +80,7 @@ export const authOptions: NextAuthOptions = {
         session.user._id = token._id;
         session.user.email = token.email;
         session.user.fullname = token.fullname;
+        session.user.profileImage=token?.profileImage;
         session.user.isVerified = token.isVerified;
         session.user.isAcceptingMessages = token.isAcceptingMessages;
         session.user.role = token.role;

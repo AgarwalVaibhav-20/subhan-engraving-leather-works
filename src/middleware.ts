@@ -7,20 +7,15 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
 
   const isAuthRoute =
-    url.pathname === '/' ||
     url.pathname.startsWith('/login') ||
     url.pathname.startsWith('/signup') ||
     url.pathname.startsWith('/verify');
 
-  const isAdminRoute = url.pathname.startsWith('/admin');
+  const isAdminRoute = url.pathname.startsWith('/admin/dashboard');
 
   // Redirect authenticated users away from auth pages
   if (token && isAuthRoute) {
-    if (token.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    } else {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   // Protect admin routes

@@ -4,5 +4,6 @@ export interface ApiResponse {
   success: boolean;
   message: string;
   isAcceptingMessages?: boolean;
+  profileImage:string;
   messages?: Array<Message>;
 }

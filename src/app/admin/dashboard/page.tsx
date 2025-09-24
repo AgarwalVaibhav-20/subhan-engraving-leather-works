@@ -478,7 +478,7 @@ const Page = () => {
   const transactionData = generatePreviousMonthData();
 
   return (
-    <main className="bg-white min-h-screen w-full p-4 sm:p-6 md:p-8 overflow-x-hidden max-w-screen-xl mx-auto space-y-4">
+    <main className="bg-white h-screen w-full p-4 sm:p-6 md:p-8 overflow-x-hidden   space-y-4">
       <div className="space-y-6">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 max-md:flex-row">
           <div className="headings flex flex-col">

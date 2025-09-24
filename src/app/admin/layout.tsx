@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <AdminSidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
 
       {/* Scrollable main content */}
-      <main className="flex-1 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto">
         {children}
       </main>
     </div>

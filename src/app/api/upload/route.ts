@@ -1,57 +1,111 @@
-// app/api/upload/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import cloudinary from '@/lib/cloudinary';
-import formidable, { File } from 'formidable';
-import { mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { NextRequest, NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
+import { ProductModel } from "@/model/Product";
+import dbConnect from "@/lib/dbConnect";
 
-const uploadDir = path.join(process.cwd(), '/tmp');
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-async function ensureUploadDir() {
-  try {
-    await stat(uploadDir);
-  } catch (e) {
-    await mkdir(uploadDir, { recursive: true });
-  }
-}
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
 export async function POST(req: NextRequest) {
-  await ensureUploadDir();
+  try {
+    await dbConnect();
 
-  const form = formidable({
-    uploadDir,
-    keepExtensions: true,
-    multiples: true,
-  });
+    const formData = await req.formData();
+    const files = formData.getAll("images") as File[];
 
-  const { files, fields } = await new Promise<{ files: formidable.Files; fields: formidable.Fields }>((resolve, reject) => {
-    form.parse(req as any, (err, fields, files) => {
-      if (err) reject(err);
-      else resolve({ fields, files });
+    if (!files || files.length === 0) {
+      return NextResponse.json(
+        { error: "No images provided" },
+        { status: 400 }
+      );
+    }
+
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = parseFloat(formData.get("price") as string);
+    const category = formData.get("category") as string;
+    const brand = formData.get("brand") as string;
+    const inStock = parseInt(formData.get("inStock") as string);
+    const discountPrice = parseInt(formData.get('discountPrice') as string)
+    const aboutTheItems = formData.getAll("aboutTheItem") as string[]
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !category ||
+      !brand || 
+      !aboutTheItems ||
+      !discountPrice ||
+      isNaN(inStock)
+    ) {
+      return NextResponse.json(
+        { error: "Missing or invalid fields" },
+        { status: 400 }
+      );
+    }
+
+    const imageUrls: string[] = [];
+
+    for (const file of files.slice(0, 4)) {
+      if (!file.type.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "Only image files are allowed" },
+          { status: 400 }
+        );
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: "Image too large (max 5MB)" },
+          { status: 400 }
+        );
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const uploaded = await new Promise<any>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "subhan_engraving_leather_works" },
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
+        );
+        Readable.from(buffer).pipe(uploadStream);
+      });
+
+      imageUrls.push(uploaded.secure_url);
+    }
+
+    const newProduct = new ProductModel({
+      name,
+      description,
+      price,
+      category,
+      brand,
+      inStock,
+      aboutTheItems,
+      discountPrice, 
+      images: imageUrls,
     });
-  });
 
-  const uploadedImages: string[] = [];
-  const fileArray = Array.isArray(files.images) ? files.images : [files.images];
+    const saved = await newProduct.save();
 
-  for (const file of fileArray) {
-    const uploaded = await cloudinary.uploader.upload((file as File).filepath, {
-      folder: 'products',
-    });
-    uploadedImages.push(uploaded.secure_url);
+    return NextResponse.json(
+      { success: true, product: saved },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Upload failed:", error);
+    return NextResponse.json(
+      { error: (error as Error).message || "Upload failed" },
+      { status: 500 }
+    );
   }
-
-  const product = JSON.parse(fields.product);
-
-  return NextResponse.json({
-    message: 'Product uploaded!',
-    images: uploadedImages,
-    product,
-  });
 }
