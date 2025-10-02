@@ -1,6 +1,7 @@
 // context/CartContext.tsx
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
+
 type CartItem = {
   id: string;
   name: string;
@@ -25,11 +26,22 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem("cart");
-    if (stored) setCart(JSON.parse(stored));
+    if (stored) {
+      try {
+        setCart(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse cart from localStorage", e);
+        localStorage.removeItem("cart");
+      }
+    }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    if (cart.length > 0) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } else {
+      localStorage.removeItem("cart");
+    }
   }, [cart]);
 
   const addToCart = (item: CartItem) => {
@@ -37,7 +49,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const exists = prev.find((p) => p.id === item.id);
       if (exists) {
         return prev.map((p) =>
-          p.id === item.id ? { ...p, quantity: p.quantity + 1 } : p
+          p.id === item.id ? { ...p, quantity: p.quantity + (item.quantity || 1) } : p
         );
       }
       return [...prev, { ...item, quantity: item.quantity || 1 }];

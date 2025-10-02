@@ -1,13 +1,12 @@
 import mongoose, { Schema, Document, model } from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 
 export interface IProduct extends Document {
-  productID: string;
+  // productID: string;
   name: string;
   description: string;
   aboutTheItems?: string[];
   price: number;
-  discountPrice: number; // Changed from discountPercent
+  discountPrice: number;
   images: string[];
   category: string;
   brand: string;
@@ -19,10 +18,9 @@ export interface IProduct extends Document {
 
 const productSchema = new Schema<IProduct>(
   {
-    productID: {
-      type: String,
-      default: () => `PROD-${uuidv4()}`,
-    },
+    // productID: {
+    //   type: String,
+    // },
     name: {
       type: String,
       required: [true, "Please provide a product name!"],
@@ -87,6 +85,11 @@ const productSchema = new Schema<IProduct>(
   },
   { timestamps: true }
 );
-
+// productSchema.pre("save", function (next) {
+//   if (!this.productID) {
+//     this.productID = this._id.toString();
+//   }
+//   next();
+// });
 export const ProductModel =
   mongoose.models.Product || model<IProduct>("Product", productSchema);

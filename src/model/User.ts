@@ -93,6 +93,7 @@ const UserSchema: Schema<User> = new Schema({
   isAcceptingMessage: { type: Boolean, default: true },
   reviews: [ReviewSchema],
   message: [MessageSchema],
+  createdAt:[MessageSchema]
 });
 
 // Models

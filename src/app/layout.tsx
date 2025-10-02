@@ -9,8 +9,8 @@ import { CartProvider } from "@/context/CartContext";
 import LayoutWrapper from "@/components/LayoutWrapper"; // New client wrapper
 import { WishlistProvider } from "@/context/WisListContext";
 import { Oswald, Roboto } from 'next/font/google'
-
-
+import { CustomerProvider } from "@/context/CustomerProvider";
+import { OrderProvider } from '@/context/OrderContext'
 const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], variable: '--font-oswald' })
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-roboto' })
 const geistSans = Geist({
@@ -41,7 +41,11 @@ export default function RootLayout({
             <ProductAuthProvider>
               <CartProvider>
                 <WishlistProvider>
-                  <LayoutWrapper>{children}</LayoutWrapper>
+                  <CustomerProvider>
+                    <OrderProvider>
+                      <LayoutWrapper>{children}</LayoutWrapper>
+                    </OrderProvider>
+                  </CustomerProvider>
                 </WishlistProvider>
               </CartProvider>
             </ProductAuthProvider>

@@ -5,11 +5,11 @@ import { useParams } from "next/navigation";
 import ProductViewPage from "@/components/ProductCardItem";
 
 export default function ProductDetailPage() {
-  const { productID } = useParams();
+  const { id} = useParams();
 
-  if (!productID) {
+  if (!id) {
     return <div className="p-4 text-red-500">Invalid product ID</div>;
   }
 
-  return <ProductViewPage productId={productID} />;
+  return <ProductViewPage productId={id as string} />;
 }

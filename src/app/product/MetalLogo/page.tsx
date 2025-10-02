@@ -23,7 +23,7 @@ type ProductType = {
   brand: string;
   inStock: number;
   isFeatured?: boolean;
-  productID: string;
+  // productID: string;
 };
 
 export default function Product() {
@@ -80,8 +80,8 @@ export default function Product() {
           ) : (
             products.map((product) => (
               <Link
-                key={product.productID}
-                href={`/product/RubberLogo/${product.productID}`}
+                key={product._id}
+                href={`/product/RubberLogo/${product._id}`}
               >
                 <Card className="max-sm:hidden w-[300px] rounded-2xl p-2 gap-2 h-full min-h-[580px] flex flex-col justify-between ">
                   <div>
