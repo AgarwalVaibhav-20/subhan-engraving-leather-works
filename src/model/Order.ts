@@ -2,7 +2,7 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface OrderItem {
- id: Types.ObjectId; 
+  id: Types.ObjectId;
   name: string;
   price: number;
   quantity: number;
@@ -38,9 +38,11 @@ const OrderAddressSchema = new Schema<OrderAddress>(
 );
 
 export interface Order extends Document {
-  user: Types.ObjectId;   // customer reference
+  user: Types.ObjectId;
+  customerName: string;
+  email:string;
   items: OrderItem[];
-  address: OrderAddress;  // snapshot of address
+  address: OrderAddress;
   totalAmount: number;
   status: "pending" | "processing" | "completed" | "cancelled";
   paymentStatus: "unpaid" | "paid" | "refunded";
@@ -52,6 +54,8 @@ const OrderSchema = new Schema<Order>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     items: { type: [OrderItemSchema], required: true },
+    customerName: { type: String, required: true },
+    email:{type:String , required:true},
     address: { type: OrderAddressSchema, required: true }, // snapshot saved here
     totalAmount: { type: Number, required: true },
     status: {

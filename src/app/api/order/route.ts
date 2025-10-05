@@ -1,29 +1,17 @@
 // app/api/orders/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect"; 
+import dbConnect from "@/lib/dbConnect";
 import { OrderModel } from "@/model/Order";
 import { UserModel } from "@/model/User";
 import mongoose from "mongoose";
 
+// CREATE ORDER
 export async function POST(req: NextRequest) {
   await dbConnect();
 
   try {
     const body = await req.json();
-    const { 
-      userId, 
-      items, 
-      address,
-      customerInfo,
-      totalAmount,
-      paymentMethod,
-      promoCode,
-      discount,
-      shipping,
-      tax,
-      subtotal,
-      saveInfo
-    } = body;
+    const { userId, items, address, totalAmount, saveInfo } = body;
 
     // Validation
     if (!userId || !items || !Array.isArray(items) || items.length === 0) {
@@ -33,10 +21,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 4: Enable address validation
-    if (!address || !address.street || !address.city || !address.state || !address.zipcode) {
+    if (
+      !address ||
+      !address.street ||
+      !address.city ||
+      !address.state ||
+      !address.zipcode
+    ) {
       return NextResponse.json(
-        { error: "Complete address is required (street, city, state, zipcode)" },
+        {
+          error: "Complete address is required (street, city, state, zipcode)",
+        },
         { status: 400 }
       );
     }
@@ -50,8 +45,8 @@ export async function POST(req: NextRequest) {
     // Save address to user profile if saveInfo = true
     if (saveInfo) {
       const addressExists = user.addresses?.some(
-        (addr: any) => 
-          addr.street === address.street && 
+        (addr: any) =>
+          addr.street === address.street &&
           addr.city === address.city &&
           addr.zipcode === address.zipcode
       );
@@ -73,6 +68,8 @@ export async function POST(req: NextRequest) {
     // Create order
     const newOrder = await OrderModel.create({
       user: user._id,
+      customerName: user.fullname,
+      email: user.email,
       items: items.map((item: any) => ({
         id: new mongoose.Types.ObjectId(item.productId),
         name: item.name,
@@ -87,45 +84,33 @@ export async function POST(req: NextRequest) {
         zipcode: address.zipcode,
         country: address.country || "IN",
       },
-      customerInfo: {
-        email: customerInfo?.email || user.email,
-        firstName: customerInfo?.firstName || "",
-        lastName: customerInfo?.lastName || "",
-        phone: customerInfo?.phone || user.phone || "",
-        contactTime: customerInfo?.contactTime || "",
-        specialInstructions: customerInfo?.specialInstructions || "",
-      },
-      totalAmount: totalAmount || subtotal,
-      subtotal: subtotal || totalAmount,
-      discount: discount || 0,
-      shipping: shipping || 0,
-      tax: tax || 0,
-      promoCode: promoCode || null,
-      paymentMethod: paymentMethod || "cod",
+      totalAmount,
       status: "pending",
       paymentStatus: "unpaid",
     });
 
-    await newOrder.populate("user", "fullname email phone");
-
     return NextResponse.json(
-      { 
-        message: "Order created successfully", 
+      {
+        message: "Order created successfully",
         order: newOrder,
-        orderId: newOrder._id // Crucial for the frontend confirmation
+        orderId: newOrder._id,
       },
       { status: 201 }
     );
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json(
-      { error: "Server error: " + (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error:
+          "Server error: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      },
       { status: 500 }
     );
   }
 }
 
-// GET /api/orders?userId=xxx  -> fetch orders for a customer
+
 export async function GET(req: NextRequest) {
   await dbConnect();
 
@@ -133,20 +118,110 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Missing userId parameter" },
-        { status: 400 }
-      );
+    let orders;
+
+    if (userId) {
+      console.log("Fetching orders for userId:", userId);
+      orders = await OrderModel.find({ user: userId }).sort({ createdAt: -1 }).lean();
+    } else {
+      console.log("No userId provided, fetching ALL orders (admin)");
+      orders = await OrderModel.find().sort({ createdAt: -1 }).lean();
     }
 
-    const orders = await OrderModel.find({ user: userId })
-      .populate("user", "fullname email phone")
-      .sort({ createdAt: -1 });
+    console.log("Found orders:", orders.length);
 
     return NextResponse.json({ orders, count: orders.length }, { status: 200 });
   } catch (error) {
     console.error("Error fetching orders:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Server error: " + (error instanceof Error ? error.message : "Unknown error"),
+        orders: [],
+      },
+      { status: 500 }
+    );
   }
 }
+
+// ✅ UPDATE ORDER (PUT)
+// export async function PUT(
+//   req: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   await dbConnect();
+
+//   try {
+//     const { id } = params;
+//     const body = await req.json();
+
+//     if (!id) {
+//       return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
+//     }
+
+//     const order = await OrderModel.findById(id);
+//     if (!order) {
+//       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+//     }
+
+//     // Update only allowed fields
+//     const allowedUpdates = [
+//       "status",
+//       "paymentStatus",
+//       "address",
+//       "totalAmount",
+//       "items",
+//     ];
+
+//     for (const key of Object.keys(body)) {
+//       if (allowedUpdates.includes(key)) {
+//         (order as any)[key] = body[key];
+//       }
+//     }
+
+//     await order.save();
+
+//     return NextResponse.json(
+//       { message: "Order updated successfully", order },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     console.error("Error updating order:", error);
+//     return NextResponse.json(
+//       { error: "Server error: " + (error instanceof Error ? error.message : "Unknown error") },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+// // ✅ DELETE ORDER (DELETE)
+// export async function DELETE(
+//   req: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   await dbConnect();
+
+//   try {
+//     const { id } = params;
+
+//     if (!id) {
+//       return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
+//     }
+
+//     const deletedOrder = await OrderModel.findByIdAndDelete(id);
+
+//     if (!deletedOrder) {
+//       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+//     }
+
+//     return NextResponse.json(
+//       { message: "Order deleted successfully", order: deletedOrder },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     console.error("Error deleting order:", error);
+//     return NextResponse.json(
+//       { error: "Server error: " + (error instanceof Error ? error.message : "Unknown error") },
+//       { status: 500 }
+//     );
+//   }
+// }

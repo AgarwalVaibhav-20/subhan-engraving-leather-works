@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -13,8 +14,15 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  X,
+  Plus,
+  Filter,
+  ShoppingCart,
+  Calendar,
 } from "lucide-react";
 import Image from "next/image";
+import { useProduct } from "@/context/ProductContext";
 
 // Type definitions
 interface Product {
@@ -22,9 +30,9 @@ interface Product {
   name: string;
   category: string;
   price: number;
-  stock: number;
+  inStock: number;
   status: "active" | "low_stock" | "out_of_stock";
-  image: string;
+  images: string[];
   description: string;
   sku: string;
   rating: number;
@@ -38,201 +46,27 @@ interface FormData {
   stock: string;
   description: string;
   sku: string;
-  image: string;
+  images: string[];
 }
 
-interface StatusOption {
-  value: string;
-  label: string;
-}
-
-type SortField = "name" | "price" | "stock" | "sales";
+type SortField = "name" | "price" | "inStock" | "sales";
 type SortOrder = "asc" | "desc";
 
 const ProductsPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      category: "Electronics",
-      price: 299.99,
-      stock: 45,
-      status: "active",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop",
-      description: "High-quality wireless headphones with noise cancellation",
-      sku: "WH-001",
-      rating: 4.8,
-      sales: 156,
-    },
-    {
-      id: 2,
-      name: "Smart Fitness Watch",
-      category: "Wearables",
-      price: 199.99,
-      stock: 23,
-      status: "active",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop",
-      description: "Advanced fitness tracking with heart rate monitor",
-      sku: "SW-002",
-      rating: 4.6,
-      sales: 89,
-    },
-    {
-      id: 3,
-      name: "Professional Camera Lens",
-      category: "Photography",
-      price: 899.99,
-      stock: 12,
-      status: "low_stock",
-      image:
-        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=100&h=100&fit=crop",
-      description: "85mm f/1.4 portrait lens for professional photography",
-      sku: "CL-003",
-      rating: 4.9,
-      sales: 34,
-    },
-    {
-      id: 4,
-      name: "Gaming Mechanical Keyboard",
-      category: "Gaming",
-      price: 159.99,
-      stock: 0,
-      status: "out_of_stock",
-      image:
-        "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=100&h=100&fit=crop",
-      description: "RGB backlit mechanical keyboard with blue switches",
-      sku: "KB-004",
-      rating: 4.7,
-      sales: 78,
-    },
-    {
-      id: 5,
-      name: "Bluetooth Speaker",
-      category: "Electronics",
-      price: 79.99,
-      stock: 35,
-      status: "active",
-      image:
-        "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=100&h=100&fit=crop",
-      description: "Portable waterproof Bluetooth speaker",
-      sku: "BS-005",
-      rating: 4.5,
-      sales: 120,
-    },
-    {
-      id: 6,
-      name: "Wireless Mouse",
-      category: "Accessories",
-      price: 49.99,
-      stock: 8,
-      status: "low_stock",
-      image:
-        "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&h=100&fit=crop",
-      description: "Ergonomic wireless mouse with precision tracking",
-      sku: "WM-006",
-      rating: 4.3,
-      sales: 95,
-    },
-    {
-      id: 7,
-      name: "Laptop Stand",
-      category: "Accessories",
-      price: 89.99,
-      stock: 18,
-      status: "low_stock",
-      image:
-        "https://images.unsplash.com/photo-1625842268584-8f3296236761?w=100&h=100&fit=crop",
-      description: "Adjustable aluminum laptop stand",
-      sku: "LS-007",
-      rating: 4.4,
-      sales: 67,
-    },
-    {
-      id: 8,
-      name: "USB-C Hub",
-      category: "Electronics",
-      price: 69.99,
-      stock: 42,
-      status: "active",
-      image:
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&h=100&fit=crop",
-      description: "7-in-1 USB-C hub with HDMI and charging",
-      sku: "UH-008",
-      rating: 4.6,
-      sales: 103,
-    },
-    {
-      id: 9,
-      name: "Webcam HD",
-      category: "Electronics",
-      price: 129.99,
-      stock: 0,
-      status: "out_of_stock",
-      image:
-        "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=100&h=100&fit=crop",
-      description: "1080p HD webcam with auto-focus",
-      sku: "WC-009",
-      rating: 4.2,
-      sales: 85,
-    },
-    {
-      id: 10,
-      name: "Phone Case",
-      category: "Accessories",
-      price: 24.99,
-      stock: 150,
-      status: "active",
-      image:
-        "https://images.unsplash.com/photo-1601593346740-925612772716?w=100&h=100&fit=crop",
-      description: "Protective phone case with wireless charging",
-      sku: "PC-010",
-      rating: 4.1,
-      sales: 200,
-    },
-    {
-      id: 11,
-      name: "Monitor 4K",
-      category: "Electronics",
-      price: 599.99,
-      stock: 15,
-      status: "low_stock",
-      image:
-        "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=100&h=100&fit=crop",
-      description: "27-inch 4K UHD monitor with HDR",
-      sku: "MN-011",
-      rating: 4.8,
-      sales: 45,
-    },
-    {
-      id: 12,
-      name: "Gaming Chair",
-      category: "Gaming",
-      price: 299.99,
-      stock: 12,
-      status: "low_stock",
-      image:
-        "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=100&h=100&fit=crop",
-      description: "Ergonomic gaming chair with lumbar support",
-      sku: "GC-012",
-      rating: 4.7,
-      sales: 38,
-    },
-  ]);
-
+  const { products, deleteProduct,updateProduct , loading } = useProduct();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [modalMode, setModalMode] = useState<"view" | "edit">("view");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [sortBy, setSortBy] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -241,7 +75,7 @@ const ProductsPage: React.FC = () => {
     stock: "",
     description: "",
     sku: "",
-    image: "",
+    images: [""],
   });
 
   const categories: string[] = [
@@ -251,7 +85,8 @@ const ProductsPage: React.FC = () => {
     "Gaming",
     "Accessories",
   ];
-  const statuses: StatusOption[] = [
+
+  const statuses = [
     { value: "all", label: "All Status" },
     { value: "active", label: "Active" },
     { value: "low_stock", label: "Low Stock" },
@@ -289,33 +124,54 @@ const ProductsPage: React.FC = () => {
     });
 
     setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [
-    products,
-    searchTerm,
-    selectedCategory,
-    selectedStatus,
-    sortBy,
-    sortOrder,
-  ]);
+    setCurrentPage(1);
+  }, [products, searchTerm, selectedCategory, selectedStatus, sortBy, sortOrder]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
   const handlePageChange = (page: number): void => {
     setCurrentPage(page);
   };
 
-  const handleItemsPerPageChange = (newItemsPerPage: number): void => {
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
+  const handleViewProduct = (product: Product): void => {
+    setSelectedProduct(product);
+    setModalMode("view");
+    setShowModal(true);
   };
 
-  const handleAddProduct = (): void => {
-    setEditingProduct(null);
+  const handleEditProduct = (product: Product): void => {
+    setSelectedProduct(product);
+    setFormData({
+      name: product.name,
+      category: product.category,
+      price: product.price.toString(),
+      stock: product.inStock.toString(),
+      description: product.description,
+      sku: product.sku,
+      images: product.images,
+    });
+    setModalMode("edit");
+    setShowModal(true);
+  };
+
+  const handleDeleteProduct = async (id: number): Promise<void> => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      await deleteProduct(id);
+    }
+  };
+
+  const handleSubmit = (): void => {
+    // Implement your update logic here
+    console.log("Update product:", formData);
+    setShowModal(false);
+  };
+
+  const handleCloseModal = (): void => {
+    setShowModal(false);
+    setSelectedProduct(null);
     setFormData({
       name: "",
       category: "",
@@ -323,83 +179,27 @@ const ProductsPage: React.FC = () => {
       stock: "",
       description: "",
       sku: "",
-      image: "",
+      images: [""],
     });
-    setShowModal(true);
-  };
-
-  const handleEditProduct = (product: Product): void => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      category: product.category,
-      price: product.price.toString(),
-      stock: product.stock.toString(),
-      description: product.description,
-      sku: product.sku,
-      image: product.image,
-    });
-    setShowModal(true);
-  };
-
-  const handleDeleteProduct = (id: number): void => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((product) => product.id !== id));
-    }
-  };
-
-  const handleSubmit = (): void => {
-    const stockValue = parseInt(formData.stock);
-    const productData: Omit<Product, "id"> = {
-      ...formData,
-      price: parseFloat(formData.price),
-      stock: stockValue,
-      rating: editingProduct?.rating || 0,
-      sales: editingProduct?.sales || 0,
-      status:
-        stockValue === 0
-          ? "out_of_stock"
-          : stockValue < 20
-            ? "low_stock"
-            : "active",
-    };
-
-    if (editingProduct) {
-      setProducts(
-        products.map((product) =>
-          product.id === editingProduct.id
-            ? { ...product, ...productData }
-            : product
-        )
-      );
-    } else {
-      const newProduct: Product = {
-        id: Date.now(),
-        ...productData,
-      };
-      setProducts([...products, newProduct]);
-    }
-
-    setShowModal(false);
   };
 
   const getStatusColor = (status: Product["status"]): string => {
     switch (status) {
       case "active":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "low_stock":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       case "out_of_stock":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
+        return "bg-red-50 text-red-700 border-red-200";
       default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+        return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
 
   const getStatusText = (status: Product["status"]): string => {
     switch (status) {
       case "active":
-        return "Active";
+        return "In Stock";
       case "low_stock":
         return "Low Stock";
       case "out_of_stock":
@@ -411,89 +211,111 @@ const ProductsPage: React.FC = () => {
 
   const totalProducts = products.length;
   const activeProducts = products.filter((p) => p.status === "active").length;
-  const lowStockProducts = products.filter(
-    (p) => p.status === "low_stock"
-  ).length;
-  const totalValue = products.reduce((sum, p) => sum + p.price * p.stock, 0);
+  const lowStockProducts = products.filter((p) => p.status === "low_stock").length;
+  const totalValue = products.reduce((sum, p) => sum + p.price * p.inStock, 0);
+  console.log(totalValue, "total value")
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div role="status">
+            <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+            </svg>
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen">
-      <div className="p-6 max-w-7xl mx-auto">
+    <main className="min-h-screen bg-gray-50">
+      <div className="p-6 max-w-[1400px] mx-auto">
+        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold ">Products Management</h1>
-              <p className="text-gray-400 mt-1">
-                Manage your product inventory and details
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
+              <p className="text-gray-600 mt-1">Manage your product inventory and details</p>
             </div>
+            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md">
+              <Plus size={20} />
+              Add Product
+            </button>
           </div>
 
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="  border  rounded-xl p-6 transition-all duration-200">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Products</p>
-                  <p className="text-2xl font-bold ">{totalProducts}</p>
+                  <p className="text-gray-600 text-sm font-medium">Total Products</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">{totalProducts}</p>
                 </div>
-                <Package className="text-blue-400" size={24} />
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <Package className="text-blue-600" size={24} />
+                </div>
               </div>
             </div>
-            <div className=" backdrop-blur-sm border  rounded-xl p-6  transition-all duration-200">
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className=" text-sm">Active Products</p>
-                  <p className="text-2xl font-bold text-green-400">
-                    {activeProducts}
-                  </p>
+                  <p className="text-gray-600 text-sm font-medium">Active Products</p>
+                  <p className="text-3xl font-bold text-emerald-600 mt-1">{activeProducts}</p>
                 </div>
-                <TrendingUp className="text-green-400" size={24} />
+                <div className="bg-emerald-50 p-3 rounded-lg">
+                  <TrendingUp className="text-emerald-600" size={24} />
+                </div>
               </div>
             </div>
-            <div className="  rounded-xl p-6 border transition-all duration-200">
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Low Stock</p>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {lowStockProducts}
-                  </p>
+                  <p className="text-gray-600 text-sm font-medium">Low Stock Alert</p>
+                  <p className="text-3xl font-bold text-amber-600 mt-1">{lowStockProducts}</p>
                 </div>
-                <AlertCircle className="text-yellow-400" size={24} />
+                <div className="bg-amber-50 p-3 rounded-lg">
+                  <AlertCircle className="text-amber-600" size={24} />
+                </div>
               </div>
             </div>
-            <div className=" border rounded-xl p-6  transition-all duration-200">
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Value</p>
-                  <p className="text-2xl font-bold ">
-                    ₹{totalValue.toLocaleString()}
-                  </p>
+                  <p className="text-gray-600 text-sm font-medium">Inventory Value</p>
+                  <p className="text-3xl font-bold text-purple-600 mt-1">₹{totalValue.toLocaleString()}</p>
                 </div>
-                <IndianRupee className="text-purple-400" size={24} />
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <IndianRupee className="text-purple-600" size={24} />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className=" border  rounded-xl p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <div className="relative">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
+          {/* Filters */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+              <div className="lg:col-span-2 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder="Search products, SKU..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3  border  rounded-lg "
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-3 rounded-lg focus:outline-none focus:ring-2 "
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
@@ -506,7 +328,7 @@ const ProductsPage: React.FC = () => {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-3 rounded-lg focus:outline-none "
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {statuses.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -518,126 +340,119 @@ const ProductsPage: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortField)}
-                className="px-4 py-3 rounded-lg focus:outline-none "
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="name">Sort by Name</option>
                 <option value="price">Sort by Price</option>
-                <option value="stock">Sort by Stock</option>
+                <option value="inStock">Sort by Stock</option>
                 <option value="sales">Sort by Sales</option>
               </select>
 
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-                className="px-4 py-3 rounded-lg focus:outline-none "
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-
-              <div className="flex gap-2">
-                <button className="flex-1  border px-4 py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
-                  <Download size={18} />
-                  Export
-                </button>
-              </div>
+              <button className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg transition-colors border border-gray-300">
+                <Download size={18} />
+                Export
+              </button>
             </div>
           </div>
         </div>
 
-        <div className=" border  rounded-xl overflow-hidden">
+        {/* Products Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Product
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Price
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Stock
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Rating
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Sales
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-800">
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y border">
+              <tbody className="divide-y divide-gray-200">
                 {currentProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className=" hover:bg-gray-100 transition-colors"
-                  >
-                    <td className="px-2 py-4">
-                      <div className="flex items-center gap-2 w-12 h-12">
+                  <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
                         <Image
-                          src={product.image}
-                          width={10}
-                          height={10}
+                          src={product.images[0]}
+                          width={48}
+                          height={48}
                           alt={product.name}
-                          className="w-12 h-12 rounded-lg object-cover border border-gray-600/50"
+                          className="w-12 h-12 rounded-lg object-cover border border-gray-200"
                         />
                         <div>
-                          <p className="font-semibold ">
-                            {product.name.slice(0, 10)}...
-                          </p>
-                          {/* <p className="text-sm">SKU: {product.sku}</p> */}
+                          <p className="font-medium text-gray-900">{product.name.slice(0, 30)}{product.name.length > 30 ? '...' : ''}</p>
+                          <p className="text-sm text-gray-500">SKU: {product.sku}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-4">
-                      <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm border border-blue-500/30">
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
                         {product.category}
                       </span>
                     </td>
-                    <td className="px-3 py-4">
-                      <span className="font-semibold ">₹{product.price}</span>
+                    <td className="px-6 py-4">
+                      <span className="font-semibold text-gray-900">₹{product.price.toLocaleString()}</span>
                     </td>
-                    <td className="px-3 py-4">
-                      <span
-                        className={`font-semibold ${product.stock < 20 ? "text-yellow-400" : "text-black"}`}
-                      >
-                        {product.stock}
+                    <td className="px-6 py-4">
+                      <span className={`font-semibold ${product.inStock < 20 ? "text-amber-600" : "text-gray-900"}`}>
+                        {product.inStock}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(product.status)}`}
-                      >
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(product.status)}`}>
                         {getStatusText(product.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
-                        <Star
-                          className="text-yellow-400 fill-current"
-                          size={16}
-                        />
-                        <span className="">{product.rating}</span>
+                        <Star className="text-amber-400 fill-amber-400" size={16} />
+                        <span className="font-medium text-gray-900">{product.rating}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="">{product.sales}</span>
+                      <span className="font-medium text-gray-900">{product.sales}</span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="p-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors border border-red-600/30"
+                          onClick={() => handleViewProduct(product)}
+                          className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors border border-blue-200"
+                          title="View Details"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors border border-emerald-200"
+                          title="Edit Product"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product._id)}
+                          className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors border border-red-200"
+                          title="Delete Product"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -650,12 +465,10 @@ const ProductsPage: React.FC = () => {
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <Package className="mx-auto text-gray-500 mb-4" size={48} />
-              <p className="text-gray-400 text-lg">No products found</p>
-              <p className="text-gray-500 text-sm">
-                Try adjusting your search or filters
-              </p>
+            <div className="text-center py-16">
+              <Package className="mx-auto text-gray-400 mb-4" size={64} />
+              <p className="text-gray-600 text-lg font-medium">No products found</p>
+              <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filters</p>
             </div>
           )}
 
@@ -665,25 +478,25 @@ const ProductsPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Show:</span>
+                    <span className="text-sm text-gray-600 font-medium">Show:</span>
                     <select
                       value={itemsPerPage}
-                      onChange={(e) =>
-                        handleItemsPerPageChange(Number(e.target.value))
-                      }
-                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value={5}>5</option>
                       <option value={10}>10</option>
                       <option value={20}>20</option>
                       <option value={50}>50</option>
                     </select>
-                    <span className="text-sm text-gray-600">per page</span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    Showing {startIndex + 1} to{" "}
-                    {Math.min(endIndex, filteredProducts.length)} of{" "}
-                    {filteredProducts.length} products
+                    Showing <span className="font-medium text-gray-900">{startIndex + 1}</span> to{" "}
+                    <span className="font-medium text-gray-900">{Math.min(endIndex, filteredProducts.length)}</span> of{" "}
+                    <span className="font-medium text-gray-900">{filteredProducts.length}</span> products
                   </div>
                 </div>
 
@@ -691,9 +504,9 @@ const ProductsPage: React.FC = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={18} />
                   </button>
 
                   <div className="flex items-center gap-1">
@@ -713,11 +526,10 @@ const ProductsPage: React.FC = () => {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`px-3 py-1 text-sm border rounded-lg transition-colors ${
-                            currentPage === pageNumber
-                              ? "bg-blue-500 text-white border-blue-500"
-                              : "text-gray-600 border-gray-300 hover:bg-gray-100"
-                          }`}
+                          className={`px-3 py-1.5 text-sm border rounded-lg transition-colors font-medium ${currentPage === pageNumber
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "text-gray-700 border-gray-300 hover:bg-white"
+                            }`}
                         >
                           {pageNumber}
                         </button>
@@ -728,9 +540,9 @@ const ProductsPage: React.FC = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={18} />
                   </button>
                 </div>
               </div>
@@ -738,6 +550,204 @@ const ProductsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {modalMode === "view" ? "Product Details" : "Edit Product"}
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={24} className="text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {modalMode === "view" ? (
+                <div className="space-y-6">
+                  {/* Product Images */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <Image
+                        src={selectedProduct.images[0]}
+                        width={400}
+                        height={400}
+                        alt={selectedProduct.name}
+                        className="w-full h-80 object-cover rounded-xl border border-gray-200"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedProduct.name}</h3>
+                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedProduct.status)}`}>
+                          {getStatusText(selectedProduct.status)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={20}
+                              className={i < Math.floor(selectedProduct.rating) ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-gray-600">({selectedProduct.rating}/5)</span>
+                      </div>
+
+                      <div className="space-y-3 bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Price:</span>
+                          <span className="text-2xl font-bold text-blue-600">₹{selectedProduct.price.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Stock:</span>
+                          <span className="font-semibold text-gray-900">{selectedProduct.inStock} units</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Total Sales:</span>
+                          <span className="font-semibold text-gray-900">{selectedProduct.sales} units</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">SKU:</span>
+                          <span className="font-mono text-sm font-semibold text-gray-900">{selectedProduct.sku}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-sm font-semibold text-gray-700">Category</span>
+                        <div>
+                          <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
+                            {selectedProduct.category}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-3">
+                    <h4 className="text-lg font-semibold text-gray-900">Description</h4>
+                    <p className="text-gray-600 leading-relaxed">{selectedProduct.description}</p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        setModalMode("edit");
+                        setFormData({
+                          name: selectedProduct.name,
+                          category: selectedProduct.category,
+                          price: selectedProduct.price.toString(),
+                          stock: selectedProduct.inStock.toString(),
+                          description: selectedProduct.description,
+                          sku: selectedProduct.sku,
+                          images: selectedProduct.images,
+                        });
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                    >
+                      <Edit size={18} />
+                      Edit Product
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(selectedProduct.id)}
+                      className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-lg transition-colors border border-red-200"
+                    >
+                      <Trash2 size={18} />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Category</label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Price (₹)</label>
+                      <input
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Stock Quantity</label>
+                      <input
+                        type="number"
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Description</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-4 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={handleCloseModal}
+                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                    >
+                      Update Product
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

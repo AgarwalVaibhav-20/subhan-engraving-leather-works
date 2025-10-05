@@ -12,42 +12,22 @@ type OrderItem = {
 };
 
 type OrderAddress = {
-  street: string;
-  apartment?: string;
-  city: string;
-  state: string;
-  zipcode: string;
-  country: string;
-};
-
-type CustomerInfo = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  contactTime?: string;
-  specialInstructions?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  country?: string;
 };
 
 type Order = {
   _id: string;
-  user: string | {
-    _id: string;
-    fullname: string;
-    email: string;
-    phone?: string;
-  };
+  user: string | { _id: string; fullname: string; email: string; phone?: string };
+  customerName: string;
+  email: string;
   items: OrderItem[];
   address: OrderAddress;
-  customerInfo: CustomerInfo;
   totalAmount: number;
-  subtotal: number;
-  discount: number;
-  shipping: number;
-  tax: number;
-  promoCode?: string;
-  paymentMethod: string;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  status: "pending" | "processing" | "completed" | "cancelled";
   paymentStatus: "unpaid" | "paid" | "refunded";
   createdAt: string;
   updatedAt: string;
@@ -58,8 +38,10 @@ type OrderContextType = {
   loading: boolean;
   error: string | null;
   fetchOrders: () => Promise<void>;
-  getOrderById: (orderId: string) => Order | undefined;
   refreshOrders: () => Promise<void>;
+  getOrderById: (id: string) => Order | undefined;
+  updateOrder: (id: string, updates: Partial<Order>) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
   clearError: () => void;
 };
 
@@ -69,10 +51,11 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user } = useAuth(); // assume { _id, role, fullname, email }
 
   const fetchOrders = async () => {
-    if (!user?._id && !user?.id) {
+    if (!user?._id) {
+      console.log("No user ID found, clearing orders");
       setOrders([]);
       return;
     }
@@ -81,16 +64,23 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      const userId = user._id || user.id;
-      const response = await axios.get(`/api/orders?userId=${userId}`);
-      setOrders(response.data.orders || []);
+      let response;
+
+      if (user.role === "admin") {
+        // Admin: fetch all orders
+        console.log("Admin detected, fetching ALL orders...");
+        response = await axios.get(`/api/order`);
+      } else {
+        // Normal user: fetch own orders
+        console.log("Fetching orders for user:", user._id);
+        response = await axios.get(`/api/order?userId=${user._id}`);
+      }
+
+      const ordersData = response.data.orders || [];
+      setOrders(Array.isArray(ordersData) ? ordersData : []);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
-      setError(
-        axios.isAxiosError(err) && err.response
-          ? err.response.data.error || "Failed to load orders"
-          : "Failed to load orders"
-      );
+      setError("Failed to load orders");
       setOrders([]);
     } finally {
       setLoading(false);
@@ -98,22 +88,48 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refreshOrders = async () => {
+    console.log("Refreshing orders...");
     await fetchOrders();
   };
 
-  const getOrderById = (orderId: string): Order | undefined => {
-    return orders.find((order) => order._id === orderId);
+  const getOrderById = (id: string): Order | undefined =>
+    orders.find((order) => order._id === id);
+
+  const updateOrder = async (id: string, updates: Partial<Order>) => {
+    try {
+      const response = await axios.put(`/api/order/${id}`, updates);
+      const updatedOrder: Order = response.data;
+
+      setOrders((prev) =>
+        prev.map((order) => (order._id === id ? { ...order, ...updatedOrder } : order))
+      );
+    } catch (err) {
+      console.error("Failed to update order:", err);
+      setError("Failed to update order");
+      throw err;
+    }
   };
 
-  const clearError = () => {
-    setError(null);
+  // Delete order
+  const deleteOrder = async (id: string) => {
+    try {
+      await axios.delete(`/api/order/${id}`);
+      setOrders((prev) => prev.filter((order) => order._id !== id));
+    } catch (err) {
+      console.log(err , "Error of deleting order")
+      console.error("Failed to delete order:", err);
+      setError("Failed to delete order");
+      throw err;
+    }
   };
 
-  // Auto-fetch orders when user changes
+  const clearError = () => setError(null);
+
   useEffect(() => {
     if (user) {
       fetchOrders();
     } else {
+      console.log("No user, clearing orders");
       setOrders([]);
     }
   }, [user]);
@@ -125,8 +141,10 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         loading,
         error,
         fetchOrders,
-        getOrderById,
         refreshOrders,
+        getOrderById,
+        updateOrder,
+        deleteOrder,
         clearError,
       }}
     >
@@ -137,8 +155,6 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 
 export const useOrder = () => {
   const context = useContext(OrderContext);
-  if (!context) {
-    throw new Error("useOrder must be used inside OrderProvider");
-  }
+  if (!context) throw new Error("useOrder must be used inside OrderProvider");
   return context;
 };

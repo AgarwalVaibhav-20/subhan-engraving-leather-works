@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { UserAuthProvider } from "@/context/UserContext";
-import { ProductAuthProvider } from "@/context/ProductContext";
+import { ProductProvider } from "@/context/ProductContext";
 import { CartProvider } from "@/context/CartContext";
 import LayoutWrapper from "@/components/LayoutWrapper"; // New client wrapper
 import { WishlistProvider } from "@/context/WisListContext";
@@ -38,7 +38,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}>
         <AuthProvider>
           <UserAuthProvider>
-            <ProductAuthProvider>
+            <ProductProvider>
               <CartProvider>
                 <WishlistProvider>
                   <CustomerProvider>
@@ -48,7 +48,7 @@ export default function RootLayout({
                   </CustomerProvider>
                 </WishlistProvider>
               </CartProvider>
-            </ProductAuthProvider>
+            </ProductProvider>
           </UserAuthProvider>
         </AuthProvider>
       </body>

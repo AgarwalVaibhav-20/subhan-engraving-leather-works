@@ -135,7 +135,7 @@ export default function OrderPage() {
     // Helper function to check for a valid 24-character hex string
     const isValidObjectId = (id: string | undefined) => id && /^[0-9a-fA-F]{24}$/.test(id);
 
-    const currentUserId = user._id || user.id;
+    const currentUserId = user._id 
     if (!isValidObjectId(currentUserId)) {
         alert(`❌ Error: Invalid user ID. Please log out and log back in.`);
         setIsSubmitting(false);
@@ -154,7 +154,7 @@ export default function OrderPage() {
     const orderData = {
       userId: currentUserId, 
       items: cart.map(item => ({
-        productId: item.id,
+        id: item._id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,

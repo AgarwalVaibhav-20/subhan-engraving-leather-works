@@ -26,6 +26,8 @@ import {
 import Image from "next/image";
 
 export default function MetalLogoProfile() {
+    const [productImages, setProductImages] = useState<Record<string, string>>({});
+    const [loadingImages, setLoadingImages] = useState(false);
     const { user } = useAuth();
     const { orders, loading, error, refreshOrders } = useOrder(); // Use OrderContext
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -76,6 +78,62 @@ export default function MetalLogoProfile() {
             fetchProfile();
         }
     }, [user]);
+    //new useState
+    useEffect(() => {
+        const fetchProductImages = async () => {
+            if (orders.length === 0) return;
+
+            setLoadingImages(true);
+
+            // Get all unique product IDs
+            const productIds = orders.flatMap(order =>
+                order.items.map(item => item.id.toString())
+            );
+            const uniqueIds = [...new Set(productIds)];
+
+            // ⚠️ IMPORTANT: Add ALL your category folder names here
+            const categories = ['MetalLogo', 'RubberLogo']; 
+
+            try {
+                const promises = uniqueIds.map(async (id) => {
+                    // Try each category until we find the product
+                    for (const category of categories) {
+                        try {
+                            const response = await axios.get(`/api/product/${category}/${id}`);
+
+                            // Extract image from response
+                            const product = response.data?.product || response.data;
+                            const imageUrl = product?.images?.[0] || product?.image || '/placeholder-product.jpg';
+                            console.log("image url" , imageUrl)
+
+                            return { id, imageUrl };
+                        } catch (err) {
+                            // Product not in this category, try next
+                            continue;
+                        }
+                    }
+                    // If not found in any category, use placeholder
+                    return { id, imageUrl: '/placeholder-product.jpg' };
+                });
+
+                const results = await Promise.all(promises);
+
+                // Create image map
+                const imageMap: Record<string, string> = {};
+                results.forEach(({ id, imageUrl }) => {
+                    imageMap[id] = imageUrl;
+                });
+
+                setProductImages(imageMap);
+            } catch (err) {
+                console.error('Failed to fetch product images:', err);
+            } finally {
+                setLoadingImages(false);
+            }
+        };
+
+        fetchProductImages();
+    }, [orders]);
 
     const userStats = {
         totalOrders: orders.length,
@@ -219,8 +277,8 @@ export default function MetalLogoProfile() {
                             key={id}
                             onClick={() => setActiveTab(id)}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-all duration-200 font-medium ${activeTab === id
-                                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105"
-                                    : "text-gray-600 hover:bg-gray-50"
+                                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105"
+                                : "text-gray-600 hover:bg-gray-50"
                                 }`}
                         >
                             <Icon size={18} />
@@ -277,28 +335,71 @@ export default function MetalLogoProfile() {
                                             <TableHead className="font-semibold text-gray-700 text-right">Total</TableHead>
                                         </TableRow>
                                     </TableHeader>
-                                    <TableBody>{
-                                        console.log(orders._id, "orders")}
+                                    <TableBody>
                                         {orders.map((order: any) => (
                                             <TableRow
                                                 key={order._id}
                                                 className="hover:bg-gray-50 transition-colors border-b border-gray-100"
                                             >
                                                 <TableCell className="font-mono text-sm text-gray-600">
-                                                    #{order._id.slice(-8)}
+                                                    ORD-{order._id.toUpperCase()}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex flex-col gap-1">
-                                                        {order.items.slice(0, 2).map((item: any, idx: number) => (
-                                                            <span key={idx} className="text-sm text-gray-700">
-                                                                {item.name} x{item.quantity}
-                                                            </span>
-                                                        ))}
-                                                        {order.items.length > 2 && (
-                                                            <span className="text-xs text-gray-500">
-                                                                +{order.items.length - 2} more
-                                                            </span>
-                                                        )}
+                                                    <div className="flex items-start gap-3">
+                                                        {/* Product Images */}
+                                                        <div className="flex -space-x-2">
+                                                            {order.items.slice(0, 3).map((item: any, idx: number) => {
+                                                                const itemId = item.id?.toString() || item.id;
+                                                                const imageUrl = productImages[itemId];
+
+                                                                return (
+                                                                    <div
+                                                                        key={idx}
+                                                                        className="relative w-10 h-10 rounded-lg overflow-hidden border-2 border-white shadow-sm bg-gray-100"
+                                                                        title={item.name}
+                                                                    >
+                                                                        {loadingImages ? (
+                                                                            <div className="w-full h-full flex items-center justify-center">
+                                                                                <Loader2 size={14} className="text-gray-400 animate-spin" />
+                                                                            </div>
+                                                                        ) : imageUrl && imageUrl !== '/placeholder-product.jpg' ? (
+                                                                            <Image
+                                                                                src={imageUrl}
+                                                                                alt={item.name}
+                                                                                fill
+                                                                                className="object-cover"
+                                                                                unoptimized
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-full h-full flex items-center justify-center">
+                                                                                <Package size={16} className="text-gray-400" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                            {order.items.length > 3 && (
+                                                                <div className="w-10 h-10 rounded-lg bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center">
+                                                                    <span className="text-xs font-medium text-gray-600">
+                                                                        +{order.items.length - 3}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Product Details */}
+                                                        <div className="flex flex-col gap-1">
+                                                            {order.items.slice(0, 2).map((item: any, idx: number) => (
+                                                                <span key={idx} className="text-sm text-gray-700">
+                                                                    {item.name} x{item.quantity}
+                                                                </span>
+                                                            ))}
+                                                            {order.items.length > 2 && (
+                                                                <span className="text-xs text-gray-500">
+                                                                    +{order.items.length - 2} more
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-sm text-gray-600">

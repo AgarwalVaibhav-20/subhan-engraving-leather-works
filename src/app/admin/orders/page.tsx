@@ -1,118 +1,70 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Download, 
+import {
+  Search,
+  Eye,
+  Trash2,
+  Download,
   Plus,
   Package,
   Truck,
   Clock,
   CheckCircle,
   XCircle,
-  Users,
-  IndianRupee ,
+  IndianRupee,
   ShoppingCart,
-  TrendingUp
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useOrder } from '@/context/OrderContext'
+import toast from "react-hot-toast";
+// Define the Order type to match the context
+type Order = {
+  _id: string;
+  customerName: string;
+  email: string;
+  items: { name: string; price: number; quantity: number }[];
+  address: { street?: string; apartment?: string; city?: string; state?: string; zipcode?: string; country?: string; };
+  totalAmount: number;
+  status: "pending" | "processing" | "completed" | "cancelled";
+  paymentStatus: "unpaid" | "paid" | "refunded";
+  createdAt: string;
+  updatedAt: string;
+};
 
-// Mock orders data
-const mockOrders = [
-  {
-    id: 'ORD-2024-001',
-    customerName: 'John Doe',
-    customerEmail: 'john@example.com',
-    status: 'delivered',
-    total: 149.97,
-    items: 3,
-    orderDate: '2024-01-15',
-    deliveryDate: '2024-01-18',
-    paymentMethod: 'Credit Card',
-    shippingAddress: '123 Main St, New York, NY 10001',
-    trackingNumber: 'TRK123456789'
-  },
-  {
-    id: 'ORD-2024-002',
-    customerName: 'Jane Smith',
-    customerEmail: 'jane@example.com',
-    status: 'shipped',
-    total: 88.96,
-    items: 2,
-    orderDate: '2024-01-20',
-    estimatedDelivery: '2024-01-25',
-    paymentMethod: 'PayPal',
-    shippingAddress: '456 Oak Ave, Los Angeles, CA 90210',
-    trackingNumber: 'TRK987654321'
-  },
-  {
-    id: 'ORD-2024-003',
-    customerName: 'Mike Johnson',
-    customerEmail: 'mike@example.com',
-    status: 'processing',
-    total: 299.99,
-    items: 1,
-    orderDate: '2024-01-22',
-    estimatedDelivery: '2024-01-28',
-    paymentMethod: 'Credit Card',
-    shippingAddress: '789 Pine St, Chicago, IL 60601',
-    trackingNumber: null
-  },
-  {
-    id: 'ORD-2024-004',
-    customerName: 'Sarah Wilson',
-    customerEmail: 'sarah@example.com',
-    status: 'cancelled',
-    total: 75.50,
-    items: 2,
-    orderDate: '2024-01-18',
-    paymentMethod: 'Credit Card',
-    shippingAddress: '321 Elm St, Houston, TX 77001',
-    trackingNumber: null
-  },
-  {
-    id: 'ORD-2024-005',
-    customerName: 'David Brown',
-    customerEmail: 'david@example.com',
-    status: 'pending',
-    total: 199.99,
-    items: 4,
-    orderDate: '2024-01-25',
-    paymentMethod: 'Bank Transfer',
-    shippingAddress: '654 Maple Ave, Phoenix, AZ 85001',
-    trackingNumber: null
-  }
-];
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
   processing: 'bg-blue-100 text-blue-800',
-  shipped: 'bg-purple-100 text-purple-800',
-  delivered: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800'
+  completed: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+  shipped: 'bg-purple-100 text-purple-800', // Added for consistency
 };
 
-const statusIcons = {
+const statusIcons: { [key: string]: React.ElementType } = {
   pending: Clock,
   processing: Package,
   shipped: Truck,
-  delivered: CheckCircle,
+  completed: CheckCircle,
   cancelled: XCircle
 };
 
 export default function AdminOrderDashboard() {
-  const [orders, setOrders] = useState(mockOrders);
-  const [filteredOrders, setFilteredOrders] = useState(mockOrders);
+  const { orders, loading, error, fetchOrders, updateOrder, deleteOrder } = useOrder();
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [showExportModal, setShowExportModal] = useState(false);
+
+  console.log("Order", orders.length)
+
+  // This state is local to the export modal
   const [exportFormat, setExportFormat] = useState('csv');
   const [exportDateRange, setExportDateRange] = useState('all');
   const [exportStatus, setExportStatus] = useState('all');
@@ -123,9 +75,9 @@ export default function AdminOrderDashboard() {
 
     if (searchTerm) {
       filtered = filtered.filter(order =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        order.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -134,15 +86,17 @@ export default function AdminOrderDashboard() {
     }
 
     setFilteredOrders(filtered);
+    // fetchOrders()
     setCurrentPage(1);
   }, [searchTerm, statusFilter, orders]);
 
-  // Get dashboard statistics
+  console.log("Orders length:", orders.length);
+  // Get dashboard statistics from live data
   const stats = {
     totalOrders: orders.length,
-    totalRevenue: orders.reduce((sum, order) => sum + (order.status !== 'cancelled' ? order.total : 0), 0),
+    totalRevenue: orders.reduce((sum, order) => sum + (order.status !== 'cancelled' ? order.totalAmount : 0), 0),
     pendingOrders: orders.filter(order => order.status === 'pending').length,
-    deliveredOrders: orders.filter(order => order.status === 'delivered').length
+    deliveredOrders: orders.filter(order => order.status === 'completed').length
   };
 
   // Pagination
@@ -151,171 +105,93 @@ export default function AdminOrderDashboard() {
   const currentOrders = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
-  const handleStatusChange = (orderId, newStatus) => {
-    setOrders(orders.map(order =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+    await updateOrder(orderId, { status: newStatus });
   };
 
-  const handleDeleteOrder = (orderId) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-      setOrders(orders.filter(order => order.id !== orderId));
+  const handleDeleteOrder = async (orderId: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this order? This action cannot be undone."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setDeleting(orderId);
+
+      const toastId = toast.loading("Deleting order...");
+      await deleteOrder(orderId);
+
+      toast.dismiss(toastId);
+      toast.success("✅ Order deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error("❌ Failed to delete order. Please try again.");
+    } finally {
+      setDeleting(null);
     }
   };
 
-  const openOrderModal = (order) => {
+  const openOrderModal = (order: Order) => {
     setSelectedOrder(order);
     setShowOrderModal(true);
   };
 
-  // Export functionality
+  // --- EXPORT FUNCTIONALITY ---
   const getFilteredExportData = () => {
     let exportData = [...orders];
 
-    // Filter by status if not 'all'
     if (exportStatus !== 'all') {
       exportData = exportData.filter(order => order.status === exportStatus);
     }
 
-    // Filter by date range
     if (exportDateRange !== 'all') {
       const now = new Date();
       const filterDate = new Date();
-      
+
       switch (exportDateRange) {
         case 'today':
           filterDate.setHours(0, 0, 0, 0);
-          exportData = exportData.filter(order => 
-            new Date(order.orderDate) >= filterDate
-          );
           break;
         case 'week':
           filterDate.setDate(now.getDate() - 7);
-          exportData = exportData.filter(order => 
-            new Date(order.orderDate) >= filterDate
-          );
           break;
         case 'month':
           filterDate.setMonth(now.getMonth() - 1);
-          exportData = exportData.filter(order => 
-            new Date(order.orderDate) >= filterDate
-          );
-          break;
-        case 'quarter':
-          filterDate.setMonth(now.getMonth() - 3);
-          exportData = exportData.filter(order => 
-            new Date(order.orderDate) >= filterDate
-          );
           break;
         case 'year':
           filterDate.setFullYear(now.getFullYear() - 1);
-          exportData = exportData.filter(order => 
-            new Date(order.orderDate) >= filterDate
-          );
           break;
       }
+      exportData = exportData.filter(order => new Date(order.createdAt) >= filterDate);
     }
-
     return exportData;
   };
 
-  const exportToCSV = (data) => {
-    const headers = [
-      'Order ID',
-      'Customer Name',
-      'Customer Email',
-      'Status',
-      'Total Amount',
-      'Items Count',
-      'Order Date',
-      'Delivery Date',
-      'Payment Method',
-      'Shipping Address',
-      'Tracking Number'
-    ];
-
+  const exportToCSV = (data: Order[]) => {
+    const headers = ['OrderID', 'CustomerName', 'Email', 'Status', 'TotalAmount', 'ItemsCount', 'OrderDate', 'Address'];
     const csvContent = [
       headers.join(','),
-      ...data.map(order => [
-        order.id,
-        `"${order.customerName}"`,
-        order.customerEmail,
-        order.status,
-        order.total,
-        order.items,
-        order.orderDate,
-        order.deliveryDate || order.estimatedDelivery || '',
-        `"${order.paymentMethod}"`,
-        `"${order.shippingAddress}"`,
-        order.trackingNumber || ''
+      ...data.map(o => [
+        o._id, `"${o.customerName}"`, o.email, o.status, o.totalAmount, o.items.length, new Date(o.createdAt).toLocaleDateString(),
+        `"${o.address.street}, ${o.address.city}, ${o.address.state} ${o.address.zipcode}"`
       ].join(','))
     ].join('\n');
-
     return csvContent;
-  };
-
-  const exportToJSON = (data) => {
-    return JSON.stringify(data, null, 2);
-  };
-
-  const exportToXML = (data) => {
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<orders>\n';
-    
-    data.forEach(order => {
-      xml += `  <order>\n`;
-      xml += `    <id>${order.id}</id>\n`;
-      xml += `    <customerName>${order.customerName}</customerName>\n`;
-      xml += `    <customerEmail>${order.customerEmail}</customerEmail>\n`;
-      xml += `    <status>${order.status}</status>\n`;
-      xml += `    <total>${order.total}</total>\n`;
-      xml += `    <items>${order.items}</items>\n`;
-      xml += `    <orderDate>${order.orderDate}</orderDate>\n`;
-      xml += `    <deliveryDate>${order.deliveryDate || order.estimatedDelivery || ''}</deliveryDate>\n`;
-      xml += `    <paymentMethod>${order.paymentMethod}</paymentMethod>\n`;
-      xml += `    <shippingAddress>${order.shippingAddress}</shippingAddress>\n`;
-      xml += `    <trackingNumber>${order.trackingNumber || ''}</trackingNumber>\n`;
-      xml += `  </order>\n`;
-    });
-    
-    xml += '</orders>';
-    return xml;
   };
 
   const handleExport = () => {
     const exportData = getFilteredExportData();
-    
     if (exportData.length === 0) {
       alert('No data to export with the selected filters.');
       return;
     }
 
     let content = '';
-    let filename = '';
-    let mimeType = '';
+    let filename = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+    let mimeType = 'text/csv';
 
-    const dateStr = new Date().toISOString().split('T')[0];
-    const statusStr = exportStatus === 'all' ? 'all' : exportStatus;
-    const rangeStr = exportDateRange === 'all' ? 'all' : exportDateRange;
+    content = exportToCSV(exportData);
 
-    switch (exportFormat) {
-      case 'csv':
-        content = exportToCSV(exportData);
-        filename = `orders_${statusStr}_${rangeStr}_${dateStr}.csv`;
-        mimeType = 'text/csv';
-        break;
-      case 'json':
-        content = exportToJSON(exportData);
-        filename = `orders_${statusStr}_${rangeStr}_${dateStr}.json`;
-        mimeType = 'application/json';
-        break;
-      case 'xml':
-        content = exportToXML(exportData);
-        filename = `orders_${statusStr}_${rangeStr}_${dateStr}.xml`;
-        mimeType = 'application/xml';
-        break;
-    }
-
-    // Create and download file
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -325,7 +201,6 @@ export default function AdminOrderDashboard() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
     setShowExportModal(false);
   };
 
@@ -333,16 +208,12 @@ export default function AdminOrderDashboard() {
     const data = getFilteredExportData();
     return {
       count: data.length,
-      totalValue: data.reduce((sum, order) => sum + (order.status !== 'cancelled' ? order.total : 0), 0),
-      statusBreakdown: data.reduce((acc, order) => {
-        acc[order.status] = (acc[order.status] || 0) + 1;
-        return acc;
-      }, {})
+      totalValue: data.reduce((sum, order) => sum + (order.status !== 'cancelled' ? order.totalAmount : 0), 0),
     };
   };
 
-  const StatusIcon = ({ status }) => {
-    const Icon = statusIcons[status];
+  const StatusIcon = ({ status }: { status: keyof typeof statusIcons }) => {
+    const Icon = statusIcons[status] || Clock;
     return <Icon className="h-4 w-4" />;
   };
 
@@ -381,7 +252,7 @@ export default function AdminOrderDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-md">
-                <IndianRupee  className="h-6 w-6 text-green-600" />
+                <IndianRupee className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
@@ -406,7 +277,7 @@ export default function AdminOrderDashboard() {
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Delivered</p>
+                <p className="text-sm font-medium text-gray-600">Completed</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.deliveredOrders}</p>
               </div>
             </div>
@@ -422,7 +293,7 @@ export default function AdminOrderDashboard() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="text"
-                    placeholder="Search orders, customers..."
+                    placeholder="Search by Order ID, customer name, or email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -433,16 +304,15 @@ export default function AdminOrderDashboard() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md  "
-                > z
+                  className="px-3 py-2 border border-gray-300 rounded-md"
+                >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
                   <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
+                  <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                <Button 
+                <Button
                   onClick={() => setShowExportModal(true)}
                   className="px-4 py-2 cursor-pointer flex items-center"
                 >
@@ -454,138 +324,95 @@ export default function AdminOrderDashboard() {
           </div>
 
           {/* Orders Table */}
-          <div className="overflow-x-auto max-sm:overflow-x-scroll">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Items
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{order.id}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{order.customerName}</div>
-                        <div className="text-sm text-gray-500">{order.customerEmail}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
-                        <StatusIcon status={order.status} />
-                        <span className="ml-1 capitalize">{order.status}</span>
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ₹ {order.total.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.items}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(order.orderDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => openOrderModal(order)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                          className="text-xs border-gray-300 rounded px-2 py-1"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                        <button
-                          onClick={() => handleDeleteOrder(order.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="text-center p-8">Loading orders...</div>
+            ) : error ? (
+              <div className="text-center p-8 text-red-600 flex items-center justify-center">
+                <AlertTriangle className="h-5 w-5 mr-2" /> Error: {error}
+              </div>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentOrders.length > 0 ? currentOrders.map((order) => (
+                    <tr key={order._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900" title={order._id}>ORD-{order._id.toUpperCase()}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{order.customerName || "N/A"}</div>
+                          <div className="text-sm text-gray-500">{order.email}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
+                          <StatusIcon status={order.status} />
+                          <span className="ml-1 capitalize">{order.status}</span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ₹{order.totalAmount.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {order.items.length}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-2">
+                          <button onClick={() => openOrderModal(order)} className="text-blue-600 hover:text-blue-900"><Eye className="h-4 w-4" /></button>
+                          <select
+                            value={order.status}
+                            onChange={(e) => handleStatusChange(order._id, e.target.value as Order['status'])}
+                            className="text-xs border-gray-300 rounded px-2 py-1"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                          <button
+                            onClick={() => handleDeleteOrder(order._id)}
+                            disabled={deleting === order._id}
+                            className={`${deleting === order._id
+                                ? "text-gray-400 cursor-not-allowed"
+                                : "text-red-600 hover:text-red-900"
+                              } transition-colors duration-200`}
+                            title="Delete Order"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+
+                        </div>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={7} className="text-center py-10 text-gray-500">No orders found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastItem, filteredOrders.length)}</span> of{' '}
-                    <span className="font-medium">{filteredOrders.length}</span> results
-                  </p>
-                </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          currentPage === i + 1
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                  </nav>
-                </div>
-              </div>
+              {/* ... pagination UI ... */}
             </div>
           )}
         </div>
@@ -593,109 +420,42 @@ export default function AdminOrderDashboard() {
 
       {/* Export Modal */}
       {showExportModal && (
-        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-2xl">
-          <div className="bg-white  rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Export Orders</h3>
-                <button
-                  onClick={() => setShowExportModal(false)}
-                  className="text-gray-400 hover:text-gray-500 cursor-pointer"
-                >
-                  <XCircle className="h-6 w-6" />
-                </button>
+                <h3 className="text-lg font-medium">Export Orders</h3>
+                <button onClick={() => setShowExportModal(false)}><XCircle className="h-6 w-6 text-gray-400" /></button>
               </div>
-              
               <div className="space-y-4">
-                {/* Export Format */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Export Format
-                  </label>
-                  <select
-                    value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="csv">CSV (Comma Separated Values)</option>
-                    <option value="json">JSON (JavaScript Object Notation)</option>
-                    <option value="xml">XML (Extensible Markup Language)</option>
-                  </select>
-                </div>
-
-                {/* Date Range Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date Range
-                  </label>
-                  <select
-                    value={exportDateRange}
-                    onChange={(e) => setExportDateRange(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                  <select value={exportDateRange} onChange={(e) => setExportDateRange(e.target.value)} className="w-full p-2 border rounded-md">
                     <option value="all">All Time</option>
                     <option value="today">Today</option>
                     <option value="week">Last 7 Days</option>
                     <option value="month">Last 30 Days</option>
-                    <option value="quarter">Last 3 Months</option>
                     <option value="year">Last Year</option>
                   </select>
                 </div>
-
-                {/* Status Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Order Status
-                  </label>
-                  <select
-                    value={exportStatus}
-                    onChange={(e) => setExportStatus(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
+                  <select value={exportStatus} onChange={(e) => setExportStatus(e.target.value)} className="w-full p-2 border rounded-md">
                     <option value="all">All Statuses</option>
-                    <option value="pending">Pending Only</option>
-                    <option value="processing">Processing Only</option>
-                    <option value="shipped">Shipped Only</option>
-                    <option value="delivered">Delivered Only</option>
-                    <option value="cancelled">Cancelled Only</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
-
-                {/* Export Preview */}
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Export Preview</h4>
-                  <div className="space-y-1 text-sm text-gray-600">
-                    <p><span className="font-medium">Orders to export:</span> {getExportPreview().count}</p>
-                    <p><span className="font-medium">Total value:</span> ${getExportPreview().totalValue.toFixed(2)}</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {Object.entries(getExportPreview().statusBreakdown).map(([status, count]) => (
-                        <span
-                          key={status}
-                          className={`px-2 py-1 rounded-full text-xs ${statusColors[status]}`}
-                        >
-                          {status}: {count}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                <div className="bg-gray-50 p-4 rounded-md text-sm">
+                  <h4 className="font-medium text-gray-800 mb-2">Export Preview</h4>
+                  <p>Orders to export: <span className="font-bold">{getExportPreview().count}</span></p>
+                  <p>Total value: <span className="font-bold">₹{getExportPreview().totalValue.toFixed(2)}</span></p>
                 </div>
-
-                {/* Export Actions */}
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    onClick={() => setShowExportModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleExport}
-                    disabled={getExportPreview().count === 0}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Export {getExportPreview().count} Orders
-                  </button>
+                <div className="flex justify-end space-x-3 pt-2">
+                  <Button variant="ghost" onClick={() => setShowExportModal(false)}>Cancel</Button>
+                  <Button onClick={handleExport} disabled={getExportPreview().count === 0}><Download className="h-4 w-4 mr-2" />Export</Button>
                 </div>
               </div>
             </div>
@@ -705,62 +465,42 @@ export default function AdminOrderDashboard() {
 
       {/* Order Details Modal */}
       {showOrderModal && selectedOrder && (
-        <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Order Details</h3>
-                <button
-                  onClick={() => setShowOrderModal(false)}
-                  className="text-gray-400 hover:text-gray-500"
-                >
-                  <XCircle className="h-6 w-6" />
-                </button>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-medium">Order Details</h3>
+                <button onClick={() => setShowOrderModal(false)}><XCircle className="h-6 w-6 text-gray-400" /></button>
               </div>
-              
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div><p className="font-medium text-gray-500">Order ID</p><p>ORD-{selectedOrder._id.toUpperCase()}</p></div>
+                  <div><p className="font-medium text-gray-500">Order Date</p><p>{new Date(selectedOrder.createdAt).toLocaleString()}</p></div>
+                  <div><p className="font-medium text-gray-500">Customer</p><p>{selectedOrder.customerName}</p></div>
+                  <div><p className="font-medium text-gray-500">Email</p><p>{selectedOrder.email}</p></div>
+                  <div><p className="font-medium text-gray-500">Total Amount</p><p>₹{selectedOrder.totalAmount.toFixed(2)}</p></div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Order ID</p>
-                    <p className="text-sm text-gray-900">{selectedOrder.id}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Status</p>
+                    <p className="font-medium text-gray-500">Status</p>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[selectedOrder.status]}`}>
-                      <StatusIcon status={selectedOrder.status} />
-                      <span className="ml-1 capitalize">{selectedOrder.status}</span>
+                      <StatusIcon status={selectedOrder.status} /><span className="ml-1 capitalize">{selectedOrder.status}</span>
                     </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Customer</p>
-                    <p className="text-sm text-gray-900">{selectedOrder.customerName}</p>
-                    <p className="text-sm text-gray-500">{selectedOrder.customerEmail}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <p className="text-sm text-gray-900">₹{selectedOrder.total.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Order Date</p>
-                    <p className="text-sm text-gray-900">{new Date(selectedOrder.orderDate).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Payment Method</p>
-                    <p className="text-sm text-gray-900">{selectedOrder.paymentMethod}</p>
-                  </div>
                 </div>
-                
+                <div><p className="text-sm font-medium text-gray-500">Shipping Address</p><p className="text-sm">{`${selectedOrder.address.street}, ${selectedOrder.address.apartment || ''}\n${selectedOrder.address.city}, ${selectedOrder.address.state} ${selectedOrder.address.zipcode}`}</p></div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Shipping Address</p>
-                  <p className="text-sm text-gray-900">{selectedOrder.shippingAddress}</p>
+                  <h4 className="text-md font-medium mt-4 mb-2">Items</h4>
+                  <ul className="divide-y divide-gray-200">
+                    {selectedOrder.items.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                        </div>
+                        <p className="text-sm">₹{(item.price * item.quantity).toFixed(2)}</p>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                
-                {selectedOrder.trackingNumber && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Tracking Number</p>
-                    <p className="text-sm text-gray-900 font-mono">{selectedOrder.trackingNumber}</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -769,3 +509,4 @@ export default function AdminOrderDashboard() {
     </div>
   );
 }
+
