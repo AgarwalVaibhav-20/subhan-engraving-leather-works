@@ -75,11 +75,11 @@ const LoginPage = () => {
       <div className="w-full max-w-md p-6 bg-white shadow rounded">
         <div className="flex justify-center items-center mb-4">
           <div className="w-24 h-24 relative">
-            <Image 
-              src={image} 
-              alt="Logo" 
-              fill 
-              className="object-contain" 
+            <Image
+              src={image}
+              alt="Logo"
+              fill
+              className="object-contain"
               sizes="(max-width: 768px) 100px, 150px"
             />
           </div>
@@ -102,7 +102,6 @@ const LoginPage = () => {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="password"

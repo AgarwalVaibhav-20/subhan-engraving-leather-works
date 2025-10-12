@@ -2,6 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import { ProductModel } from "@/model/Product";
 
+export const GET = async (
+  req: NextRequest,
+  // Change 'productID' to 'id' to be consistent
+  { params }: { params: { id: string } }
+) => {
+  await dbConnect();
+  try {
+    // Use the findById method, which is optimized for searching by _id
+    const product = await ProductModel.findById(params.id);
+
+    if (!product) {
+      return NextResponse.json(
+        { message: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(product, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    // It's also good practice to return a more specific error for invalid ID formats
+    if (error instanceof Error && error.name === "CastError") {
+      return NextResponse.json(
+        { message: "Invalid product ID format" },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  }
+};
+
 // UPDATE PRODUCT
 export async function PUT(
   req: NextRequest,
@@ -67,7 +98,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.log(error , "deleting error")
+    console.log(error, "deleting error");
     console.error("Error deleting product:", error);
     return NextResponse.json(
       { error: "Failed to delete product" },

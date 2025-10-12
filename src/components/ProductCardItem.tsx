@@ -20,20 +20,20 @@ type ProductType = {
   colour: string;
   pieces: number;
   inStock: number;
-  productID: string;
+  id: string;
 };
 const piecesOptions = ["500", "2500"];
 export default function ProductViewPage() {
   const { addToCart } = useCart();
-  const { productID } = useParams() as { productID: string };
+  const { id } = useParams() as { id: string };
   const [product, setProduct] = useState<ProductType | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (productID) {
+    if (id) {
       axios
-        .get(`/api/product/${productID}`)
+        .get(`/api/product/${id}`)
         .then((res) => {
           setProduct(res.data);
           if (res.data?.images?.length) {
@@ -43,7 +43,7 @@ export default function ProductViewPage() {
         .catch((err) => console.error("Failed to fetch product:", err))
         .finally(() => setLoading(false));
     }
-  }, [productID]);
+  }, [id]);
 
   const handlePrev = () => {
     if (!product?.images?.length) return;
@@ -216,7 +216,7 @@ export default function ProductViewPage() {
                   e.preventDefault();
                   e.stopPropagation();
                   addToCart({
-                    id: product.productID,
+                    id: product.id,
                     name: product.name,
                     price: product.price,
                     images: product.images,

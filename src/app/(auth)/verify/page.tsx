@@ -59,7 +59,7 @@ export default function VerifyPage() {
     if (!email) return
     try {
       setResending(true)
-      const res = await axios.post('/api/resend-otp', { email })
+      const res = await axios.post('/api/resend', { email })
       toast.success(res.data.message || 'OTP resent successfully!')
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to resend OTP.')
@@ -74,14 +74,14 @@ export default function VerifyPage() {
     duration: 3000,
   }} />
 
-      <div className="flex items-center justify-center min-h-screen 7 px-4">
-        <Card className="w-full max-w-md shadow-lg">
+      <div className="flex items-center justify-center min-h-screen py-8 px-4">
+        <Card className="w-full max-w-md shadow-lg p-4">
           <CardHeader>
             <CardTitle className='text-center'>Verify Your Email</CardTitle>
           </CardHeader>
           <CardContent>
             {email && (
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4 p-2">
                 A code was sent to: <span className="font-semibold">{email}</span>
               </p>
             )}
@@ -112,6 +112,7 @@ export default function VerifyPage() {
             {/* 🔁 Resend OTP */}
             <div className="text-sm text-muted-foreground mt-4 text-center">
               Didn’t get the code?{' '}
+              
               <button
                 type="button"
                 className="text-blue-600 underline"

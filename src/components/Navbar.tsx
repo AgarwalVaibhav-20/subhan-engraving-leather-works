@@ -13,8 +13,10 @@ import { Button } from "./ui/button";
 import { DropdownMenuDemo } from "@/components/ProfileMenu";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ProductType = {
+  _id?: string;
   name?: string;
   description?: string;
   price?: number;
@@ -37,6 +39,19 @@ const Navbar = () => {
 
   const toggleSearchBar = () => setOpenSearchBar((prev) => !prev);
   const toggleMobileMenu = () => setMenuOpen((prev) => !prev);
+
+ 
+  useEffect(() => {
+    const handleScroll = () => {
+      setMenuOpen(false);
+    };
+    if (menuOpen) {
+      window.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [menuOpen]); 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,7 +110,7 @@ const Navbar = () => {
     <main className="w-full top-0 bg-white dark:bg-gray-900 shadow-sm transition-colors duration-300 z-50">
       {/* Top Navbar */}
       <section className="flex justify-between px-4 items-center border-b dark:border-gray-700">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ">
           <Link href="/">
             <Image
               src={logo}
@@ -105,7 +120,7 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <div className="flex justify-center items-center space-x-4 sm:space-x-6">
+        <div className="flex justify-center items-center space-x-4 sm:space-x-6 max-sm:hidden">
           <Link href="/product/MetalLogo" className="hover:text-[#4f4d4d]">Metal Logo</Link>
           <Link href="/product/RubberLogo" className="hover:text-[#4f4d4d]">Rubber Logo</Link>
           <Link href="/product/Toys" className="hover:text-[#4f4d4d]">Toys</Link>
@@ -179,7 +194,7 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <button
           onClick={toggleSearchBar}
-          className="hover:opacity-75 hidden max-sm:block"
+          className="hover:opacity-75 hidden max-sm:block  max-sm:order-first"
         >
           <Search />
         </button>
@@ -189,54 +204,55 @@ const Navbar = () => {
       </section>
 
       {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="sm:hidden px-5 py-4 border-b dark:border-gray-700 space-y-4 flex flex-col">
-          <Link href="/" onClick={toggleMobileMenu}>
-            Home
-          </Link>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="mobile-menu"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="absolute left-0 w-full sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 shadow-md"
+          >
+            <div className="flex flex-col space-y-4 px-5 py-4">
+              <Link href="/" onClick={toggleMobileMenu}>Home</Link>
 
-          {user ? (
-            <>
-              <Link href="/account" onClick={toggleMobileMenu}>
-                Account
-              </Link>
-              <Link href="/cart" onClick={toggleMobileMenu}>
-                Cart
-              </Link>
-              <Link href="/wishlist" onClick={toggleMobileMenu}>
-                Wishlist
-              </Link>
-              {user.role === "admin" && (
-                <Link href="/admin/dashboard" onClick={toggleMobileMenu}>
-                  Admin Panel
-                </Link>
+              {user ? (
+                <>
+                  <Link href="/profile" onClick={toggleMobileMenu}>Account</Link>
+                  <Link href="/cart" onClick={toggleMobileMenu}>Cart</Link>
+                  <Link href="/wishlist" onClick={toggleMobileMenu}>Wishlist</Link>
+
+                  {user.role === "admin" && (
+                    <Link href="/admin/dashboard" onClick={toggleMobileMenu}>
+                      Admin Panel
+                    </Link>
+                  )}
+
+                  <Button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      signOut({ callbackUrl: "/login" });
+                    }}
+                    className="text-white bg-black w-full"
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={toggleMobileMenu}>
+                    <Button className="w-full">Login</Button>
+                  </Link>
+                  <Link href="/signup" onClick={toggleMobileMenu}>
+                    <Button className="w-full">Sign Up</Button>
+                  </Link>
+                </>
               )}
-              <Button
-                onClick={() => {
-                  setMenuOpen(false);
-                  signOut({ callbackUrl: "/login" });
-                }}
-                className="text-white bg-black"
-              >
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button>
-                <Link href="/login" onClick={toggleMobileMenu}>
-                  Login
-                </Link>
-              </Button>
-              <Button>
-                <Link href="/signup" onClick={toggleMobileMenu}>
-                  Sign Up
-                </Link>
-              </Button>
-            </>
-          )}
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Search Bar & Overlay */}
       {openSearchBar && (
@@ -278,7 +294,7 @@ const Navbar = () => {
                       filterData.map((product, index) => (
                         <li key={index} className="py-1 cursor-pointer">
                           <Link
-                            href={`/product/${product.productID}`}
+                            href={`/product/${product._id}`}
                             onClick={() => setOpenSearchBar(false)}
                           >
                             {highlightMatch(product.name || "", inputValue)}
@@ -307,7 +323,7 @@ const Navbar = () => {
                           className="flex-shrink-0 w-[250px] sm:w-[280px] md:w-[260px] lg:w-[300px] border rounded-2xl bg-white dark:bg-zinc-900 shadow-md"
                         >
                           <Link
-                            href={`/product/${product.productID}`}
+                            href={`/product/${product._id}`}
                             onClick={() => setOpenSearchBar(false)}
                           >
                             <div className="group rounded-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between">

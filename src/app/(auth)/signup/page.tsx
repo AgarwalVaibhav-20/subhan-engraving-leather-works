@@ -57,33 +57,33 @@ const Page = () => {
     },
   })
 
- const onSubmit = async (data: SignupFormData) => {
-  setIsSubmitting(true)
-  setAlert(null)
-  try {
-    const response = await axios.post<ApiResponse>('/api/sign-up', data)
+  const onSubmit = async (data: SignupFormData) => {
+    setIsSubmitting(true)
+    setAlert(null)
+    try {
+      const response = await axios.post<ApiResponse>('/api/sign-up', data)
 
-    setAlert({
-      type: 'success',
-      message: response.data.message || "Account created successfully",
-    })
+      setAlert({
+        type: 'success',
+        message: response.data.message || "Account created successfully",
+      })
 
-    setTimeout(() => {
-      // ✅ Redirect with query param, not dynamic route
-      router.replace(`/verify?email=${encodeURIComponent(data.email)}`)
-    }, 1000)
-  } catch (error) {
-    const axiosError = error as AxiosError<ApiResponse>
-    const errorMessage = axiosError.response?.data.message || 'Something went wrong'
+      setTimeout(() => {
+        // ✅ Redirect with query param, not dynamic route
+        router.replace(`/verify?email=${encodeURIComponent(data.email)}`)
+      }, 1000)
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>
+      const errorMessage = axiosError.response?.data.message || 'Something went wrong'
 
-    setAlert({
-      type: 'error',
-      message: errorMessage,
-    })
-  } finally {
-    setIsSubmitting(false)
+      setAlert({
+        type: 'error',
+        message: errorMessage,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-}
 
 
   return (
@@ -104,11 +104,13 @@ const Page = () => {
 
         {/* ✅ Alert Component */}
         {alert && (
-          <Alert variant={alert.type === 'error' ? 'destructive' : 'default'} className="mb-4">
-            <AlertCircle className="h-5 w-5" />
-            <AlertTitle>{alert.type === 'error' ? 'Error' : 'Success'}</AlertTitle>
-            <AlertDescription>{alert.message}</AlertDescription>
-          </Alert>
+          <div className="fixed top-17 right-4 z-50">
+            <Alert variant={alert.type === 'error' ? 'destructive' : 'default'}>
+              <AlertCircle className="h-5 w-5" />
+              <AlertTitle>{alert.type === 'error' ? 'Error' : 'Success'}</AlertTitle>
+              <AlertDescription>{alert.message}</AlertDescription>
+            </Alert>
+          </div>
         )}
 
         <Form {...form}>
