@@ -1,8 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import 'lenis/dist/lenis.css';
 html, body {
   overflow: hidden;
 }
+
 
 @custom-variant dark (&:is(.dark *));
 @media (prefers-reduced-motion: reduce) {
