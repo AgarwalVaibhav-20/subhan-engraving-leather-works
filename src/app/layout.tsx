@@ -12,6 +12,8 @@ import { Oswald, Roboto } from 'next/font/google'
 import { CustomerProvider } from "@/context/CustomerProvider";
 import { OrderProvider } from '@/context/OrderContext'
 import SmoothScrollWrapper from "@/components/SmoothScrollWrapper";
+import { DashboardProvider } from "@/context/DashboardContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], variable: '--font-oswald' })
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-roboto' })
 const geistSans = Geist({
@@ -44,11 +46,15 @@ export default function RootLayout({
                 <WishlistProvider>
                   <CustomerProvider>
                     <OrderProvider>
-                        <LayoutWrapper>
-                          <SmoothScrollWrapper>
-                            {children}
-                          </SmoothScrollWrapper>
-                        </LayoutWrapper>
+                      <LayoutWrapper>
+                        <SmoothScrollWrapper>
+                          <DashboardProvider>
+                            <TransactionProvider>
+                              {children}
+                            </TransactionProvider>
+                          </DashboardProvider>
+                        </SmoothScrollWrapper>
+                      </LayoutWrapper>
                     </OrderProvider>
                   </CustomerProvider>
                 </WishlistProvider>

@@ -110,38 +110,112 @@ export async function POST(req: NextRequest) {
   }
 }
 
-
 export async function GET(req: NextRequest) {
   await dbConnect();
 
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userId = searchParams.get("userId"); // optional → for user dashboards
 
-    let orders;
+    const query: any = {};
+    if (userId) query.user = userId;
 
-    if (userId) {
-      console.log("Fetching orders for userId:", userId);
-      orders = await OrderModel.find({ user: userId }).sort({ createdAt: -1 }).lean();
-    } else {
-      console.log("No userId provided, fetching ALL orders (admin)");
-      orders = await OrderModel.find().sort({ createdAt: -1 }).lean();
+    // Fetch all orders (lean for performance) and populate if needed
+    const orders = await OrderModel.find(query)
+      .sort({ createdAt: -1 }) // Most recent first
+      .lean();
+
+    // Initialize metrics
+    const totalOrders = orders.length;
+    let pendingOrders = 0;
+    let completedOrders = 0;
+    let cancelledOrders = 0;
+    let totalRevenue = 0;
+    let todayOrders = 0;
+    let todayRevenue = 0;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Aggregate metrics
+    for (const order of orders) {
+      const orderDate = new Date(order.createdAt);
+
+      // Count by status
+      if (order.status === "pending") pendingOrders++;
+      else if (order.status === "completed") {
+        completedOrders++;
+        totalRevenue += order.totalAmount || 0;
+      } else if (order.status === "cancelled") cancelledOrders++;
+
+      // Count today's
+      if (orderDate >= today) {
+        todayOrders++;
+        if (order.status === "completed")
+          todayRevenue += order.totalAmount || 0;
+      }
     }
 
-    console.log("Found orders:", orders.length);
-
-    return NextResponse.json({ orders, count: orders.length }, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching orders:", error);
+    // 📊 Prepare response with stats AND orders
     return NextResponse.json(
       {
-        error: "Server error: " + (error instanceof Error ? error.message : "Unknown error"),
-        orders: [],
+        stats: {
+          totalOrders,
+          pendingOrders,
+          completedOrders,
+          cancelledOrders,
+          totalRevenue,
+          todayOrders,
+          todayRevenue,
+        },
+        orders, // Include the full order data
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    return NextResponse.json(
+      {
+        error:
+          "Server error: " +
+          (error instanceof Error ? error.message : "Unknown error"),
       },
       { status: 500 }
     );
   }
 }
+
+// export async function GET(req: NextRequest) {
+//   await dbConnect();
+
+//   try {
+//     const { searchParams } = new URL(req.url);
+//     const userId = searchParams.get("userId");
+
+//     let orders;
+
+//     if (userId) {
+//       console.log("Fetching orders for userId:", userId);
+//       orders = await OrderModel.find({ user: userId }).sort({ createdAt: -1 }).lean();
+//     } else {
+//       console.log("No userId provided, fetching ALL orders (admin)");
+//       orders = await OrderModel.find().sort({ createdAt: -1 }).lean();
+//     }
+
+//     console.log("Found orders:", orders.length);
+
+//     return NextResponse.json({ orders, count: orders.length }, { status: 200 });
+//   } catch (error) {
+//     console.error("Error fetching orders:", error);
+//     return NextResponse.json(
+//       {
+//         error: "Server error: " + (error instanceof Error ? error.message : "Unknown error"),
+//         orders: [],
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 // ✅ UPDATE ORDER (PUT)
 // export async function PUT(

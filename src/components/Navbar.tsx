@@ -40,7 +40,7 @@ const Navbar = () => {
   const toggleSearchBar = () => setOpenSearchBar((prev) => !prev);
   const toggleMobileMenu = () => setMenuOpen((prev) => !prev);
 
- 
+
   useEffect(() => {
     const handleScroll = () => {
       setMenuOpen(false);
@@ -51,7 +51,7 @@ const Navbar = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [menuOpen]); 
+  }, [menuOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -215,16 +215,20 @@ const Navbar = () => {
             className="absolute left-0 w-full sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 shadow-md"
           >
             <div className="flex flex-col space-y-4 px-5 py-4">
-              <Link href="/" onClick={toggleMobileMenu}>Home</Link>
+              <Link href="/" onClick={toggleMobileMenu} className="hover:bg-gray-100 dark:bg-gray-800 p-2 rounded">Home</Link>
 
               {user ? (
                 <>
-                  <Link href="/profile" onClick={toggleMobileMenu}>Account</Link>
-                  <Link href="/cart" onClick={toggleMobileMenu}>Cart</Link>
-                  <Link href="/wishlist" onClick={toggleMobileMenu}>Wishlist</Link>
+                  {user.role === "user" && (
+                    <>
+                      <Link href="/profile" onClick={toggleMobileMenu} className="hover:bg-gray-100 dark:bg-gray-800 p-2 rounded">Account</Link>
+                      <Link href="/cart" onClick={toggleMobileMenu} className="hover:bg-gray-100 dark:bg-gray-800 p-2 rounded">Cart</Link>
+                      <Link href="/wishlist" onClick={toggleMobileMenu} className="hover:bg-gray-100 dark:bg-gray-800 p-2 rounded">Wishlist</Link>
+                    </>
+                  )}
 
                   {user.role === "admin" && (
-                    <Link href="/admin/dashboard" onClick={toggleMobileMenu}>
+                    <Link href="/admin/dashboard" onClick={toggleMobileMenu} className="hover:bg-gray-100 dark:bg-gray-800 p-2 rounded">
                       Admin Panel
                     </Link>
                   )}
@@ -253,6 +257,7 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
 
       {/* Search Bar & Overlay */}
       {openSearchBar && (

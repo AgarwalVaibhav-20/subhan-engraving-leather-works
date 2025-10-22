@@ -124,7 +124,7 @@
 //             duration: 1.2,
 //             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
 //         });
-        
+
 //         function raf(time) {
 //             lenis.raf(time);
 //             requestAnimationFrame(raf);
@@ -147,7 +147,7 @@
 //                 duration: 0.8,
 //                 delay: 0.3
 //             });
-            
+
 //             // Craftsmanship Section - Enhanced Pinned Animation
 //             const steps = gsap.utils.toArray('.step-panel');
 //             if (steps.length > 0) {
@@ -272,7 +272,7 @@
 //                 .animate-infinite-scroll {
 //                     animation: infinite-scroll 25s linear infinite;
 //                 }
-                
+
 //                 /* Custom scrollbar */
 //                 ::-webkit-scrollbar {
 //                     width: 8px;
@@ -305,7 +305,7 @@
 //                     />
 //                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-zinc-900/20"></div>
 //                 </motion.div>
-                
+
 //                 <motion.div className="relative z-10 p-4 max-w-6xl mx-auto" style={{ y: textY }}>
 //                     <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold uppercase tracking-wider leading-tight">
 //                         {"Forge Your Identity".split("").map((char, i) => (
@@ -378,7 +378,7 @@
 //                         Discover our specialized craftsmanship across multiple disciplines
 //                     </p>
 //                 </motion.div>
-                
+
 //                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 //                     {categoriesData.map((item, i) => (
 //                         <motion.div
@@ -415,7 +415,7 @@
 //                     ))}
 //                 </div>
 //             </section>
-            
+
 //             {/* ✨ Optimized Full-Height Toys Showcase Section ✨ */}
 //             <section ref={toysRef} className="relative h-screen bg-zinc-900 overflow-hidden">
 //                 {/* Compact Fixed Header */}
@@ -427,7 +427,7 @@
 //                         <p className="text-base md:text-lg text-neutral-400">Scroll horizontally to meet our handcrafted friends</p>
 //                     </div>
 //                 </div>
-                
+
 //                 {/* Full Height Toys Container */}
 //                 <div 
 //                     className="flex flex-nowrap h-full"
@@ -443,17 +443,17 @@
 //                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
 //                                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:20px_20px]"></div>
 //                             </div>
-                            
+
 //                             {/* Full Height Content Container */}
 //                             <div className="relative z-10 w-full h-full flex items-center justify-center px-4 sm:px-8 py-20">
 //                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center w-full max-w-7xl mx-auto h-full max-h-[80vh]">
-                                    
+
 //                                     {/* Toy Image Container - Maximized Height */}
 //                                     <div className="toy-card flex justify-center items-center order-2 lg:order-1 h-full">
 //                                         <div className="relative w-full h-full max-w-2xl max-h-[600px] flex items-center justify-center">
 //                                             {/* Decorative background circle */}
 //                                             <div className="absolute inset-0 bg-white/20 rounded-full blur-3xl animate-pulse scale-75"></div>
-                                            
+
 //                                             {/* Main image container - Full available space */}
 //                                             <div className="relative w-full h-full animate-float">
 //                                                 <Image 
@@ -465,7 +465,7 @@
 //                                                     priority={index < 3}
 //                                                 />
 //                                             </div>
-                                            
+
 //                                             {/* Floating decorative elements */}
 //                                             <div className="absolute top-4 right-4 w-6 h-6 bg-white/30 rounded-full animate-ping"></div>
 //                                             <div className="absolute bottom-4 left-4 w-4 h-4 bg-white/20 rounded-full animate-bounce"></div>
@@ -473,7 +473,7 @@
 //                                             <div className="absolute bottom-1/3 right-0 w-5 h-5 bg-white/15 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
 //                                         </div>
 //                                     </div>
-                                    
+
 //                                     {/* Text Content - Optimized vertical space */}
 //                                     <div className="toy-text text-center lg:text-left order-1 lg:order-2 space-y-4 lg:space-y-6 flex flex-col justify-center h-full">
 //                                         <div>
@@ -484,11 +484,11 @@
 //                                                 {toy.name}
 //                                             </h3>
 //                                         </div>
-                                        
+
 //                                         <p className="text-white/90 font-body text-base sm:text-lg lg:text-xl max-w-md mx-auto lg:mx-0 leading-relaxed">
 //                                             {toy.description}
 //                                         </p>
-                                        
+
 //                                         <div className="pt-2">
 //                                             <Link href="/product/toys">
 //                                                 <motion.button
@@ -507,7 +507,7 @@
 //                                     </div>
 //                                 </div>
 //                             </div>
-                            
+
 //                             {/* Progress indicator - Better positioned */}
 //                             <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
 //                                 {toysData.map((_, i) => (
@@ -533,7 +533,7 @@
 //                     </h2>
 //                     <p className="text-center text-neutral-400 text-base mt-2">Our meticulous process from concept to completion</p>
 //                 </div>
-                
+
 //                 {/* Full Height Content Container */}
 //                 <div 
 //                     className="flex flex-nowrap h-full"
@@ -543,11 +543,11 @@
 //                         <div key={index} className="step-panel w-screen h-full flex items-center justify-center relative">
 //                             {/* Background Pattern */}
 //                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(245,158,11,0.05)_0%,transparent_50%)] opacity-50"></div>
-                            
+
 //                             {/* Content - Full Height Usage */}
 //                             <div className="w-full h-full flex items-center justify-center px-4 sm:px-8 py-20">
 //                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-7xl mx-auto w-full h-full max-h-[80vh]">
-                                    
+
 //                                     {/* Image Container - Maximized */}
 //                                     <div className={`relative w-full h-full max-h-[600px] rounded-2xl overflow-hidden shadow-2xl ${index % 2 === 0 ? 'order-1' : 'order-2'}`}>
 //                                         <Image 
@@ -558,13 +558,13 @@
 //                                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 45vw"
 //                                         />
 //                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
-                                        
+
 //                                         {/* Step number overlay */}
 //                                         <div className="absolute top-6 left-6 w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center">
 //                                             <span className="text-zinc-900 font-bold text-xl">{index + 1}</span>
 //                                         </div>
 //                                     </div>
-                                    
+
 //                                     {/* Text Content - Optimized spacing */}
 //                                     <div className={`space-y-4 lg:space-y-6 flex flex-col justify-center h-full ${index % 2 === 0 ? 'order-2' : 'order-1'}`}>
 //                                         <div>
@@ -575,11 +575,11 @@
 //                                                 {step.title}
 //                                             </h3>
 //                                         </div>
-                                        
+
 //                                         <p className="text-neutral-300 font-body text-base lg:text-lg leading-relaxed">
 //                                             {step.description}
 //                                         </p>
-                                        
+
 //                                         {/* Enhanced Progress Visualization */}
 //                                         <div className="space-y-2">
 //                                             <div className="flex justify-between text-sm text-neutral-400">
@@ -593,7 +593,7 @@
 //                                                 ></div>
 //                                             </div>
 //                                         </div>
-                                        
+
 //                                         {/* Process indicators */}
 //                                         <div className="flex space-x-2 pt-2">
 //                                             {craftsmanshipSteps.map((_, i) => (
@@ -638,48 +638,48 @@ gsap.registerPlugin(ScrollTrigger);
 
 // --- Component Data ---
 const clientLogos = [
-  { src: "/productPhotos/rider.png", alt: "Rider Logo" },
-  { src: "/productPhotos/berunni3.png", alt: "Berunni Logo" },
-  { src: "/productPhotos/horse.png", alt: "Horse Logo" },
-  { src: "/productPhotos/logos.jpg", alt: "Logos Showcase" },
-  { src: "/productPhotos/drilldown.jpeg", alt: "Drilldown Logo" },
+    { src: "/productPhotos/rider.png", alt: "Rider Logo" },
+    { src: "/productPhotos/berunni3.png", alt: "Berunni Logo" },
+    { src: "/productPhotos/horse.png", alt: "Horse Logo" },
+    { src: "/productPhotos/logos.jpg", alt: "Logos Showcase" },
+    { src: "/productPhotos/drilldown.jpeg", alt: "Drilldown Logo" },
 ];
 
 const categoriesData = [
-  { src: '/productPhotos/logos.jpg', title: "Rubber & Metal Logos", href: "/products/RubberLogo" },
-  { src: '/productPhotos/idealharness.png', title: "Apparel Branding", href: "/product/apparel" },
-  { src: '/productPhotos/rubber.jpg', title: "Custom Accessories", href: "/product/accessories" },
-  { src: '/productPhotos/drilldownwhite.jpeg', title: "Precision Metalwork", href: "/product/MetalLogo" },
-  // horse: { /* ... data for horse accessories ... */ },
-  //   logos: { /* ... data for logos ... */ },
-  //   toys: { /* ... data for toys ... */ }
+    { src: '/productPhotos/logos.jpg', title: "Rubber & Metal Logos", href: "/products/RubberLogo" },
+    { src: '/productPhotos/idealharness.png', title: "Apparel Branding", href: "/product/apparel" },
+    { src: '/productPhotos/rubber.jpg', title: "Custom Accessories", href: "/product/accessories" },
+    { src: '/productPhotos/drilldownwhite.jpeg', title: "Precision Metalwork", href: "/product/MetalLogo" },
+    // horse: { /* ... data for horse accessories ... */ },
+    //   logos: { /* ... data for logos ... */ },
+    //   toys: { /* ... data for toys ... */ }
 ];
 
 const projectsData = [
-  { name: "Opulento", image: "/productPhotos/rider.png" },
-  { name: "Torecelli", image: "/productPhotos/berunni3.png" },
-  { name: "Platinum", image: "/productPhotos/horse.png" },
-  { name: "Opla", image: "/productPhotos/logos.jpg" },
-  { name: "Trecip", image: "/productPhotos/drilldown.jpeg" },
+    { name: "Opulento", image: "/productPhotos/rider.png" },
+    { name: "Torecelli", image: "/productPhotos/berunni3.png" },
+    { name: "Platinum", image: "/productPhotos/horse.png" },
+    { name: "Opla", image: "/productPhotos/logos.jpg" },
+    { name: "Trecip", image: "/productPhotos/drilldown.jpeg" },
 ];
 
 const craftsmanshipSteps = [
-    { 
+    {
         title: "Concept & Design",
         description: "Every masterpiece begins with an idea. We collaborate with you to translate your vision into a detailed blueprint, ensuring every curve and detail is perfected before production.",
         image: "/productPhotos/horse.png"
     },
-    { 
+    {
         title: "Material Selection",
         description: "We source only the finest metals, leathers, and polymers. The material is the soul of the emblem, chosen for its durability, texture, and character.",
         image: "/productPhotos/mainstay.jpg" // Replace with a relevant image
     },
-    { 
+    {
         title: "Precision Crafting",
         description: "Using state-of-the-art machinery and artisanal techniques, our craftsmen meticulously forge, stamp, and mold each piece. This is where your design comes to life.",
         image: "/productPhotos/drilldownwhite.jpeg" // Replace with a relevant image
     },
-    { 
+    {
         title: "Finishing & Quality",
         description: "The final touches are applied – polishing, plating, and coloring. Every single item undergoes a rigorous quality check to ensure it meets our exacting standards of excellence.",
         image: "/image2.jpg" // Replace with a relevant image
@@ -702,7 +702,7 @@ export default function Page() {
     //     requestAnimationFrame(raf);
     // }, []);
 
-        // ✨ Add these new refs
+    // ✨ Add these new refs
     const projectsSectionRef = useRef(null);
     const imagePreviewRef = useRef(null);
 
@@ -717,7 +717,7 @@ export default function Page() {
                 duration: 1,
                 delay: 0.5
             });
-            
+
             // Craftsmanship Section - Pinned Animation
             const steps = gsap.utils.toArray('.step-panel');
             gsap.to(steps, {
@@ -736,67 +736,67 @@ export default function Page() {
     }, []);
 
     // GSAP Animations
-useEffect(() => {
-    let ctx = gsap.context(() => {
-        // ... (your existing GSAP animations for .char and craftsmanship)
+    useEffect(() => {
+        let ctx = gsap.context(() => {
+            // ... (your existing GSAP animations for .char and craftsmanship)
 
-        // ✨ --- START: NEW ANIMATION LOGIC FOR IMAGE HOVER --- ✨
-        
-        // Select all the project items and the image preview elements
-        const projects = gsap.utils.toArray('.project-item');
-        const imagePreview = imagePreviewRef.current;
-        const imagePreviewImg = imagePreview.querySelector('img');
+            // ✨ --- START: NEW ANIMATION LOGIC FOR IMAGE HOVER --- ✨
 
-        // Create a "quickTo" function for smooth mouse following
-        // This is more performant than using gsap.to() in a mousemove event
-        const xTo = gsap.quickTo(imagePreview, "x", { duration: 0.6, ease: "power3" });
-        const yTo = gsap.quickTo(imagePreview, "y", { duration: 0.6, ease: "power3" });
-        
-        // 1. Animate the image position to follow the mouse
-        const moveImage = (e) => {
-            const { clientX, clientY } = e;
-            // We subtract half the image's width/height to center it on the cursor
-            xTo(clientX - imagePreview.offsetWidth / 2);
-            yTo(clientY - imagePreview.offsetHeight / 2);
-        };
-        projectsSectionRef.current.addEventListener("mousemove", moveImage);
+            // Select all the project items and the image preview elements
+            const projects = gsap.utils.toArray('.project-item');
+            const imagePreview = imagePreviewRef.current;
+            const imagePreviewImg = imagePreview.querySelector('img');
 
-        // 2. Animate the image visibility on hover
-        projects.forEach(project => {
-            // On mouse enter
-            project.addEventListener("mouseenter", (e) => {
-                // Update the image source
-                const newImage = e.currentTarget.getAttribute('data-image');
-                if (newImage) {
-                    imagePreviewImg.src = newImage;
-                }
-                
-                // Animate the image in
-                gsap.to(imagePreview, {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.3,
-                    ease: "power2.out"
+            // Create a "quickTo" function for smooth mouse following
+            // This is more performant than using gsap.to() in a mousemove event
+            const xTo = gsap.quickTo(imagePreview, "x", { duration: 0.6, ease: "power3" });
+            const yTo = gsap.quickTo(imagePreview, "y", { duration: 0.6, ease: "power3" });
+
+            // 1. Animate the image position to follow the mouse
+            const moveImage = (e) => {
+                const { clientX, clientY } = e;
+                // We subtract half the image's width/height to center it on the cursor
+                xTo(clientX - imagePreview.offsetWidth / 2);
+                yTo(clientY - imagePreview.offsetHeight / 2);
+            };
+            projectsSectionRef.current.addEventListener("mousemove", moveImage);
+
+            // 2. Animate the image visibility on hover
+            projects.forEach(project => {
+                // On mouse enter
+                project.addEventListener("mouseenter", (e) => {
+                    // Update the image source
+                    const newImage = e.currentTarget.getAttribute('data-image');
+                    if (newImage) {
+                        imagePreviewImg.src = newImage;
+                    }
+
+                    // Animate the image in
+                    gsap.to(imagePreview, {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 0.3,
+                        ease: "power2.out"
+                    });
+                });
+
+                // On mouse leave
+                project.addEventListener("mouseleave", () => {
+                    // Animate the image out
+                    gsap.to(imagePreview, {
+                        opacity: 0,
+                        scale: 0.8,
+                        duration: 0.3,
+                        ease: "power2.in"
+                    });
                 });
             });
 
-            // On mouse leave
-            project.addEventListener("mouseleave", () => {
-                // Animate the image out
-                gsap.to(imagePreview, {
-                    opacity: 0,
-                    scale: 0.8,
-                    duration: 0.3,
-                    ease: "power2.in"
-                });
-            });
-        });
-        
-        // ✨ --- END: NEW ANIMATION LOGIC --- ✨
-    }, projectsSectionRef); // Scope the context to the new section for better performance
+            // ✨ --- END: NEW ANIMATION LOGIC --- ✨
+        }, projectsSectionRef); // Scope the context to the new section for better performance
 
-    return () => ctx.revert(); // Cleanup
-}, []); // Empty dependency array ensures this runs only once
+        return () => ctx.revert(); // Cleanup
+    }, []); // Empty dependency array ensures this runs only once
 
     // Framer Motion Parallax for Hero Background
     const { scrollYProgress } = useScroll({
@@ -826,14 +826,14 @@ useEffect(() => {
                     <h1 className="font-heading text-6xl md:text-8xl font-bold uppercase tracking-wider">
                         {/* Splitting text for character animation */}
                         {"Forge Your Identity".split("").map((char, i) => (
-                           <span key={i} className="inline-block overflow-hidden">
+                            <span key={i} className="inline-block overflow-hidden">
                                 <span className="char inline-block">
                                     {char === " " ? "\u00A0" : char}
                                 </span>
                             </span>
                         ))}
                     </h1>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 1.5 }}
@@ -861,38 +861,38 @@ useEffect(() => {
                 <div className="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
                     <ul className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll">
                         {clientLogos.map((logo, i) => (
-                           <li key={i}><Image src={logo.src} alt={logo.alt} width={150} height={50} className="grayscale hover:grayscale-0 transition-all duration-300" /></li> 
+                            <li key={i}><Image src={logo.src} alt={logo.alt} width={150} height={50} className="grayscale hover:grayscale-0 transition-all duration-300" /></li>
                         ))}
                     </ul>
                     {/* Duplicate for seamless effect */}
                     <ul className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll" aria-hidden="true">
                         {clientLogos.map((logo, i) => (
-                           <li key={i}><Image src={logo.src} alt={logo.alt} width={150} height={50} className="grayscale hover:grayscale-0 transition-all duration-300" /></li> 
+                            <li key={i}><Image src={logo.src} alt={logo.alt} width={150} height={50} className="grayscale hover:grayscale-0 transition-all duration-300" /></li>
                         ))}
                     </ul>
                 </div>
             </section>
 
-             {/* ===== Forging Ideas Section ===== */}
+            {/* ===== Forging Ideas Section ===== */}
             <section className="relative w-full min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-center overflow-hidden my-24">
                 {/* The particle canvas serves as the background */}
                 <FireParticles />
 
                 {/* The text content sits on top of the canvas */}
                 <div className="relative z-10 p-8 max-w-4xl mx-auto">
-                    
+
                     {/* ✅ REPLACE ScrambledText WITH RevealingText */}
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.8 }} 
+                        whileInView={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: 0.8 }}
                         viewport={{ once: true }}
                         className="font-body text-5xl tracking-wide md:text-xl mt-6 max-w-2xl mx-auto text-white"
                     >
                         Forging Digital Realities
                     </motion.p>
-                    
-                    <motion.p 
+
+                    <motion.p
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 0.8 }} // Shortened delay to sync with new text animation
@@ -947,7 +947,7 @@ useEffect(() => {
                 </div>
             </section>
 
-            
+
             {/* ===== Craftsmanship Process Section ===== */}
             <section ref={craftsmanshipRef} className="relative h-screen bg-zinc-950 flex flex-col justify-center overflow-hidden">
                 <div className="absolute top-0 left-0 w-full p-8 z-10">
@@ -960,7 +960,7 @@ useEffect(() => {
                         <div key={index} className="step-panel w-screen h-full flex items-center justify-center p-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
                                 <div className="relative w-full h-96 rounded-lg overflow-hidden">
-                                    <Image src={step.image} alt={step.title} fill className="object-cover"/>
+                                    <Image src={step.image} alt={step.title} fill className="object-cover" />
                                 </div>
                                 <div>
                                     <span className="text-amber-400 font-bold">STEP {index + 1}</span>
@@ -975,20 +975,20 @@ useEffect(() => {
 
             {/* Image on hover */}
             {/* ===== Image on hover Section ===== */}
-            <section 
+            <section
                 ref={projectsSectionRef} // ✨ Add ref here
                 className="w-full min-h-screen bg-zinc-950 flex items-center justify-center relative"
             >
                 {/* This is the floating image container */}
-                <div 
+                <div
                     ref={imagePreviewRef} // ✨ Add ref here
                     className="w-80 h-96 rounded-lg overflow-hidden absolute pointer-events-none opacity-0 scale-0"
                 >
-                    <Image 
+                    <Image
                         src="/productPhotos/rider.png" // Default src, will be changed by GSAP
-                        alt="Project Preview" 
-                        fill 
-                        className="object-cover" 
+                        alt="Project Preview"
+                        fill
+                        className="object-cover"
                     />
                 </div>
 
@@ -996,14 +996,14 @@ useEffect(() => {
                     {projectsData.map((project, index) => (
                         // Use React.Fragment to handle keys for multiple elements
                         <React.Fragment key={project.name}>
-                            <div 
+                            <div
                                 className="project-item text-8xl text-[#f2f2f2] flex gap-5 items-center cursor-pointer"
                                 data-image={project.image} // ✨ Add data attribute
                             >
                                 {project.name} <ArrowUpRight size={80} />
                             </div>
                             {/* Don't render a <hr> after the last item */}
-                            {index < projectsData.length - 1 && <hr />} 
+                            {index < projectsData.length - 1 && <hr />}
                         </React.Fragment>
                     ))}
                 </div>

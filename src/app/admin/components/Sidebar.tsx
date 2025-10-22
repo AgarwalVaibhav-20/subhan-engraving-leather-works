@@ -11,17 +11,19 @@ import {
   Package,
   Users,
   Settings,
+  IndianRupee
 } from 'lucide-react';
 
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, route: '/admin/dashboard' },
   { id: 'orders', label: 'Orders', icon: ShoppingCart, route: '/admin/orders' },
   { id: 'products', label: 'Products', icon: Package, route: '/admin/products' },
+  { id: 'transactions', label: 'Transactions', icon: IndianRupee, route: '/admin/transactions' },
   { id: 'upload', label: 'Upload Product', icon: Upload, route: '/admin/uploads' },
-  { id: 'customers', label: 'Customers', icon: Users, route: '/admin/customer' },
+  { id: 'customers', label: 'Customers', icon: Users, route: '/admin/customers' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, route: '/admin/analytics' },
   { id: 'settings', label: 'Settings', icon: Settings, route: '/admin/settings' },
-  {id:'main page' , label:"Main page" , icon:Home , route:'/'}
+  { id: 'main page', label: 'Main page', icon: Home, route: '/' }
 ];
 
 const AdminSidebar = ({ isMobileOpen, setIsMobileOpen }) => {

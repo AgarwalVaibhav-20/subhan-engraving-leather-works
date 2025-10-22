@@ -1,13 +1,12 @@
+
 "use client"
 
 import { useEffect, useState } from 'react';
-import { Search, Filter, Download, Plus, Eye, Edit2, Trash2, Mail, Phone, MapPin, Calendar, ShoppingBag, DollarSign, X, User, Package, CreditCard, Clock, Star, ChevronLeft, ChevronRight, Save, Cancel } from 'lucide-react';
-import { useCustomers } from "@/context/CustomerProvider";
-interface Customer {
-  customerID: string;
-  fullname: string;
-  email: string;
-  profileImage: string;
+import { Search, Filter, Download, Plus, Eye, Edit2, Trash2, Mail, Phone, MapPin, Calendar, ShoppingBag, IndianRupee, X, User, Package, CreditCard, Clock, Star, ChevronLeft, ChevronRight, Save, Cancel } from 'lucide-react';
+import { useCustomers, Customer as ContextCustomer } from "@/context/CustomerProvider";
+
+// Extended interface for display purposes - merges context data with computed fields
+interface CustomerDisplay extends ContextCustomer {
   phone?: string;
   address?: string;
   status?: 'Active' | 'Inactive' | 'Suspended';
@@ -30,43 +29,6 @@ interface Order {
   paymentMethod: string;
 }
 
-// Mock data generator
-const generateMockCustomers = (): Customer[] => {
-  const firstNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emily', 'Chris', 'Lisa', 'Tom', 'Anna', 'James', 'Maria', 'Robert', 'Jennifer', 'William', 'Jessica', 'Michael', 'Ashley', 'Christopher', 'Amanda'];
-  const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Miller', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Garcia', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen'];
-  const domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'company.com'];
-  const statuses: Customer['status'][] = ['Active', 'Inactive', 'Suspended'];
-  const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Pune', 'Hyderabad', 'Ahmedabad'];
-  const payments = ['Credit Card', 'Debit Card', 'UPI', 'Net Banking', 'Cash on Delivery'];
-
-  return Array.from({ length: 120 }, (_, i) => {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const fullname = `${firstName} ${lastName}`;
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domains[Math.floor(Math.random() * domains.length)]}`;
-    const totalOrders = Math.floor(Math.random() * 50) + 1;
-    const totalSpent = Math.floor(Math.random() * 100000) + 1000;
-    
-    return {
-      customerID: `CUST-${String(i + 1).padStart(6, '0')}`,
-      fullname,
-      email,
-      profileImage: fullname.split(' ').map(n => n[0]).join(''),
-      phone: `+91 ${Math.floor(Math.random() * 10000000000).toString().padStart(10, '0')}`,
-      address: `${Math.floor(Math.random() * 999) + 1}, ${cities[Math.floor(Math.random() * cities.length)]}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      joinDate: new Date(Date.now() - Math.floor(Math.random() * 730) * 24 * 60 * 60 * 1000).toISOString(),
-      lastLogin: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
-      totalOrders,
-      totalSpent,
-      averageOrderValue: Math.floor(totalSpent / totalOrders),
-      preferredPayment: payments[Math.floor(Math.random() * payments.length)],
-      lastOrderDate: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString(),
-      loyaltyPoints: Math.floor(Math.random() * 5000)
-    };
-  });
-};
-
 // Generate mock orders for a customer
 const generateMockOrders = (customerId: string, orderCount: number): Order[] => {
   const statuses: Order['status'][] = ['Completed', 'Pending', 'Cancelled'];
@@ -82,50 +44,71 @@ const generateMockOrders = (customerId: string, orderCount: number): Order[] => 
   }));
 };
 
+// Transform context customer to display customer with computed fields
+const transformCustomerForDisplay = (customer: ContextCustomer): CustomerDisplay => {
+  const defaultAddress = customer.addresses?.find(a => a.isDefault) || customer.addresses?.[0];
+  
+  // Generate consistent random data based on customer ID
+  const seed = customer.customerID.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const random = (min: number, max: number) => {
+    const x = Math.sin(seed) * 10000;
+    return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min;
+  };
+
+  const totalOrders = random(1, 50);
+  const totalSpent = random(5000, 100000);
+  
+  return {
+    ...customer,
+    phone: (customer as any).phone || '+91 ' + String(random(7000000000, 9999999999)),
+    address: defaultAddress 
+      ? `${defaultAddress.city}, ${defaultAddress.state}` 
+      : 'Not specified',
+    status: customer.isloggedIn ? 'Active' : customer.isVerified ? 'Inactive' : 'Suspended',
+    joinDate: customer.createdAt,
+    lastLogin: customer.updatedAt,
+    totalOrders: totalOrders,
+    totalSpent: totalSpent,
+    averageOrderValue: totalSpent / totalOrders,
+    preferredPayment: ['Credit Card', 'Debit Card', 'UPI', 'Net Banking'][random(0, 3)],
+    lastOrderDate: customer.updatedAt,
+    loyaltyPoints: random(100, 1000)
+  };
+};
+
 export default function CustomersTablePage() {
-   const { getCustomer , loading, error } = useCustomers();
-  // const [customers, setCustomers] = useState<Customer[]>([]);
-  // const [loading, setLoading] = useState(true);
+  const { customers: contextCustomers, updateCustomer, deleteCustomer, loading, error } = useCustomers();
+  const [customers, setCustomers] = useState<CustomerDisplay[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDisplay | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarMode, setSidebarMode] = useState<'view' | 'edit' | 'orders'>('view');
-  const [editForm, setEditForm] = useState<Customer | null>(null);
+  const [editForm, setEditForm] = useState<CustomerDisplay | null>(null);
   const [customerOrders, setCustomerOrders] = useState<Order[]>([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // Transform context customers to display customers
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const mockData = generateMockCustomers();
-        setCustomers(mockData);
-      } catch (error) {
-        console.error("Failed to fetch customers", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+    const displayCustomers = contextCustomers.map(transformCustomerForDisplay);
+    setCustomers(displayCustomers);
+  }, [contextCustomers]);
 
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.customerID.toLowerCase().includes(searchTerm.toLowerCase());
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.customerID.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || customer.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-    let aValue, bValue;
+    let aValue: any, bValue: any;
     switch (sortBy) {
       case 'name':
         aValue = a.fullname.toLowerCase();
@@ -146,7 +129,7 @@ export default function CustomersTablePage() {
       default:
         return 0;
     }
-    
+
     if (sortOrder === 'asc') {
       return aValue > bValue ? 1 : -1;
     } else {
@@ -164,20 +147,20 @@ export default function CustomersTablePage() {
     setCurrentPage(page);
   };
 
-  const handleCustomerClick = (customer: Customer) => {
+  const handleCustomerClick = (customer: CustomerDisplay) => {
     setSelectedCustomer(customer);
     setSidebarMode('view');
     setSidebarOpen(true);
   };
 
-  const handleEditCustomer = (customer: Customer) => {
+  const handleEditCustomer = (customer: CustomerDisplay) => {
     setSelectedCustomer(customer);
     setEditForm({ ...customer });
     setSidebarMode('edit');
     setSidebarOpen(true);
   };
 
-  const handleViewOrders = (customer: Customer) => {
+  const handleViewOrders = (customer: CustomerDisplay) => {
     setSelectedCustomer(customer);
     const orders = generateMockOrders(customer.customerID, customer.totalOrders || 0);
     setCustomerOrders(orders);
@@ -185,22 +168,29 @@ export default function CustomersTablePage() {
     setSidebarOpen(true);
   };
 
-  const handleDeleteCustomer = (customer: Customer) => {
-    if (confirm(`Are you sure you want to delete ${customer.fullname}?`)) {
-      setCustomers(prev => prev.filter(c => c.customerID !== customer.customerID));
-      if (selectedCustomer?.customerID === customer.customerID) {
-        closeSidebar();
+  const handleSaveCustomer = async () => {
+    if (editForm) {
+      const updateData: Partial<ContextCustomer> = {
+        fullname: editForm.fullname,
+        email: editForm.email,
+        isloggedIn: editForm.status === 'Active',
+        isVerified: editForm.status !== 'Suspended'
+      };
+
+      const result = await updateCustomer(editForm._id, updateData);
+      if (result) {
+        setSidebarMode('view');
+        setSelectedCustomer(editForm);
       }
     }
   };
 
-  const handleSaveCustomer = () => {
-    if (editForm) {
-      setCustomers(prev => prev.map(c => 
-        c.customerID === editForm.customerID ? editForm : c
-      ));
-      setSelectedCustomer(editForm);
-      setSidebarMode('view');
+  const handleDeleteCustomer = async (customer: CustomerDisplay) => {
+    if (confirm(`Are you sure you want to delete ${customer.fullname}?`)) {
+      const success = await deleteCustomer(customer._id);
+      if (success) {
+        closeSidebar();
+      }
     }
   };
 
@@ -218,7 +208,8 @@ export default function CustomersTablePage() {
     if (!amount) return '₹0';
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR'
+      currency: 'INR',
+      maximumFractionDigits: 0
     }).format(amount);
   };
 
@@ -268,7 +259,7 @@ export default function CustomersTablePage() {
     }
   };
 
-  const getCustomerTier = (totalSpent?: number) => {
+  const customersTier = (totalSpent?: number) => {
     if (!totalSpent) return 'Silver';
     if (totalSpent > 50000) return 'Premium';
     if (totalSpent > 25000) return 'Gold';
@@ -280,16 +271,16 @@ export default function CustomersTablePage() {
     return Math.floor((Date.now() - new Date(joinDate).getTime()) / (1000 * 60 * 60 * 24));
   };
 
-  const calculateOrderFrequency = (customer: Customer) => {
+  const calculateOrderFrequency = (customer: CustomerDisplay) => {
     const daysSinceJoining = calculateDaysSinceJoining(customer.joinDate);
     const monthsSinceJoining = Math.max(Math.floor(daysSinceJoining / 30), 1);
     return Math.floor((customer.totalOrders || 0) / monthsSinceJoining);
   };
 
   const generatePageNumbers = () => {
-    const pages = [];
+    const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -311,7 +302,7 @@ export default function CustomersTablePage() {
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -330,6 +321,17 @@ export default function CustomersTablePage() {
     );
   }
 
+  if (error) {
+    return (
+      <main className="p-6 max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-red-800 font-semibold mb-2">Error Loading Customers</h3>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <main className={`flex-1 p-6 max-w-7xl mx-auto transition-all duration-300 ${sidebarOpen ? 'mr-96' : ''}`}>
@@ -340,10 +342,10 @@ export default function CustomersTablePage() {
               <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
               <p className="text-gray-600 mt-1">Manage your customer database</p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+            {/* <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
               <Plus size={20} />
               Add Customer
-            </button>
+            </button> */}
           </div>
 
           {/* Stats Cards */}
@@ -355,14 +357,14 @@ export default function CustomersTablePage() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-gray-600">Total Customers</p>
-                  <p className="text-xl font-semibold">{getCustomer.length}</p>
+                  <p className="text-xl font-semibold">{customers.length}</p>
                 </div>
               </div>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm border">
               <div className="flex items-center">
                 <div className="p-2 bg-green-100 rounded-lg">
-                  <DollarSign className="text-green-600" size={20} />
+                  <IndianRupee className="text-green-600" size={20} />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-gray-600">Total Revenue</p>
@@ -503,7 +505,7 @@ export default function CustomersTablePage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{customer.fullname}</div>
-                          <div className="text-sm text-gray-500">ID: {customer.customerID}</div>
+                          <div className="text-sm text-gray-500">ID: {customer.customerID.slice(0,10).toUpperCase()}</div>
                         </div>
                       </div>
                     </td>
@@ -701,7 +703,7 @@ export default function CustomersTablePage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">{selectedCustomer.fullname}</h3>
-                  <p className="text-gray-500">ID: {selectedCustomer.customerID}</p>
+                  <p className="text-gray-500">ID: {selectedCustomer.customerID.toLocaleUpperCase()}</p>
                   {sidebarMode !== 'edit' && (
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${getStatusBadge(selectedCustomer.status)}`}>
                       <div className={`w-2 h-2 rounded-full mr-1 ${getStatusColor(selectedCustomer.status)}`}></div>
@@ -891,7 +893,7 @@ export default function CustomersTablePage() {
                       </div>
                       <div className="bg-green-50 p-4 rounded-lg">
                         <div className="flex items-center justify-between">
-                          <DollarSign size={20} className="text-green-600" />
+                          <IndianRupee size={20} className="text-green-600" />
                           <span className="text-lg font-bold text-green-600">{formatCurrency(selectedCustomer.totalSpent).slice(1)}</span>
                         </div>
                         <p className="text-sm text-green-600 mt-1">Total Spent</p>
@@ -964,7 +966,7 @@ export default function CustomersTablePage() {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-green-900">Customer Tier</span>
                           <span className="text-sm text-green-700">
-                            {getCustomerTier(selectedCustomer.totalSpent)}
+                            {customersTier(selectedCustomer.totalSpent)}
                           </span>
                         </div>
                       </div>

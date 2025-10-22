@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { useDashboard } from "@/context/DashboardContext";
 import {
   CalendarDays,
   Bell,
@@ -58,6 +59,14 @@ import {
 } from "@/components/ui/card";
 
 const Page = () => {
+  const { stats, loading, error, refreshStats } = useDashboard();
+  console.log("Dashboard stats:", stats);
+  console.log(" stats",stats?.totalRevenue || 0, stats?.cancelledOrders , stats?.totalOrders)
+
+
+  if (loading) return <p>Loading dashboard stats...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!stats) return <p>No stats available</p>;
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [customers, setCustomers] = useState([ 
     { name: "Ravi Sharma", email: "ravi@example.com", phone: "9876543210", address: "Delhi, India" },
@@ -247,6 +256,12 @@ const Page = () => {
     { month: 'Apr', sales: 61000, orders: 156 },
     { month: 'May', sales: 55000, orders: 142 },
     { month: 'Jun', sales: 67000, orders: 178 },
+    { month: 'Jul', sales: 72000, orders: 190 },
+    { month: 'Aug', sales: 69000, orders: 185 },
+    { month: 'Sep', sales: 75000, orders: 200 },
+    { month: 'Oct', sales: 80000, orders: 220 },
+    { month: 'Nov', sales: 82000, orders: 230 },
+    { month: 'Dec', sales: 90000, orders: 250 },
   ];
 
   const categoryData = [
@@ -261,7 +276,7 @@ const Page = () => {
   const statsCards = [
     {
       title: "Total Revenue",
-      value: "₹1,25,000",
+      value: stats.totalOrders ? `₹${(stats.totalRevenue || 0).toLocaleString()}` : "₹0",
       change: "+12%",
       trend: "up",
       icon: DollarSign,
@@ -288,7 +303,7 @@ const Page = () => {
     },
     {
       title: "Pending Orders",
-      value: "23",
+      value: `${stats?.pendingOrders}`,
       change: "-5%",
       trend: "down",
       icon: Clock,
@@ -306,7 +321,7 @@ const Page = () => {
     },
     {
       title: "Total Orders",
-      value: "856",
+      value: `${stats.totalOrders}`,
       change: "+22%",
       trend: "up",
       icon: ShoppingCart,
@@ -325,9 +340,9 @@ const filteredOrders = filter === "All"
     <main className="bg-gray-50 min-h-screen w-full p-4 sm:p-6 md:p-8 overflow-x-hidden space-y-6">
       <div className="space-y-6">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 max-md:flex-row">
-          <div className="headings flex flex-col">
+          <div className="headings flex flex-col  max-sm:items-center">
             <h4 className="font-semibold text-2xl text-gray-800">Welcome Back, {name}.</h4>
-            <h4 className="font-extralight text-gray-600">Here's what's happening with your business today</h4>
+            <h4 className="font-extralight text-gray-600  max-sm:hidden">Here's what's happening with your business today</h4>
           </div>
 
           <div className="flex items-center space-x-4 max-sm:items-end">
@@ -542,7 +557,7 @@ const filteredOrders = filter === "All"
         </div>
 
         {/* Monthly Sales Chart */}
-        <Card className="bg-white">
+        <Card className="bg-white p-2">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Overall Sales Performance</CardTitle>
           </CardHeader>

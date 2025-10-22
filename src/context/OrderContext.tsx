@@ -1,6 +1,6 @@
 // context/OrderContext.tsx
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import axios from "axios";
 import { useAuth } from "@/context/UserContext";
 
@@ -13,6 +13,7 @@ type OrderItem = {
 
 type OrderAddress = {
   street?: string;
+  apartment?: string;
   city?: string;
   state?: string;
   zipcode?: string;
@@ -21,14 +22,29 @@ type OrderAddress = {
 
 type Order = {
   _id: string;
+  orderId: string;
   user: string | { _id: string; fullname: string; email: string; phone?: string };
-  customerName: string;
-  email: string;
+  customerName?: string;
+  email?: string;
   items: OrderItem[];
   address: OrderAddress;
+  customerInfo?: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    contactTime?: string;
+    specialInstructions?: string;
+  };
   totalAmount: number;
+  subtotal?: number;
+  shipping?: number;
+  tax?: number;
+  discount?: number;
   status: "pending" | "processing" | "completed" | "cancelled";
-  paymentStatus: "unpaid" | "paid" | "refunded";
+  paymentMethod?: string;
+  paymentStatus?: "unpaid" | "paid" | "refunded";
+  promoCode?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -51,15 +67,25 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth(); // assume { _id, role, fullname, email }
+  const { user } = useAuth();
+  const hasFetched = useRef(false);
+  const isFetching = useRef(false);
 
   const fetchOrders = async () => {
     if (!user?._id) {
       console.log("No user ID found, clearing orders");
       setOrders([]);
+      hasFetched.current = false;
       return;
     }
 
+    // Prevent concurrent calls
+    if (isFetching.current) {
+      console.log("Already fetching orders, skipping...");
+      return;
+    }
+
+    isFetching.current = true;
     setLoading(true);
     setError(null);
 
@@ -67,28 +93,29 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
       let response;
 
       if (user.role === "admin") {
-        // Admin: fetch all orders
         console.log("Admin detected, fetching ALL orders...");
         response = await axios.get(`/api/order`);
       } else {
-        // Normal user: fetch own orders
         console.log("Fetching orders for user:", user._id);
         response = await axios.get(`/api/order?userId=${user._id}`);
       }
 
       const ordersData = response.data.orders || [];
       setOrders(Array.isArray(ordersData) ? ordersData : []);
+      hasFetched.current = true;
     } catch (err) {
       console.error("Failed to fetch orders:", err);
       setError("Failed to load orders");
       setOrders([]);
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
   };
 
   const refreshOrders = async () => {
-    console.log("Refreshing orders...");
+    console.log("Manually refreshing orders...");
+    hasFetched.current = false;
     await fetchOrders();
   };
 
@@ -110,13 +137,11 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Delete order
   const deleteOrder = async (id: string) => {
     try {
       await axios.delete(`/api/order/${id}`);
       setOrders((prev) => prev.filter((order) => order._id !== id));
     } catch (err) {
-      console.log(err , "Error of deleting order")
       console.error("Failed to delete order:", err);
       setError("Failed to delete order");
       throw err;
@@ -125,14 +150,17 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 
   const clearError = () => setError(null);
 
+  // Use user._id instead of entire user object to prevent infinite loops
   useEffect(() => {
-    if (user) {
+    if (user?._id && !hasFetched.current && !isFetching.current) {
+      console.log("Initial fetch triggered for user:", user._id);
       fetchOrders();
-    } else {
+    } else if (!user) {
       console.log("No user, clearing orders");
       setOrders([]);
+      hasFetched.current = false;
     }
-  }, [user]);
+  }, [user?._id]); // Only depend on user ID, not entire user object
 
   return (
     <OrderContext.Provider
