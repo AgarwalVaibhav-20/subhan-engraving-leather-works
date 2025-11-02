@@ -42,9 +42,17 @@ export default function ResendOtpPage() {
         router.push(`/verify?email=${data.email}`);
       }, 2000);
 
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to resend OTP.');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else if (typeof err === 'object' && err !== null && 'response' in err) {
+        const apiError = err as { response?: { data?: { message?: string } } };
+        toast.error(apiError.response?.data?.message || 'Failed to resend OTP.');
+      } else {
+        toast.error('Failed to resend OTP.');
+      }
     }
+
   };
 
   return (

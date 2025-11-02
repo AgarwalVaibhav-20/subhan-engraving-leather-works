@@ -2,7 +2,8 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { Search, Filter, Download, Plus, Eye, Edit2, Trash2, Mail, Phone, MapPin, Calendar, ShoppingBag, IndianRupee, X, User, Package, CreditCard, Clock, Star, ChevronLeft, ChevronRight, Save, Cancel } from 'lucide-react';
+import { Search, Download, Eye, Edit2, Trash2, Mail, Phone, MapPin, Calendar, ShoppingBag, IndianRupee, X, User, Package, CreditCard, Clock, Star, ChevronLeft, ChevronRight, Save } from 'lucide-react';
+
 import { useCustomers, Customer as ContextCustomer } from "@/context/CustomerProvider";
 
 interface CustomerDisplay extends ContextCustomer {
@@ -59,7 +60,7 @@ const transformCustomerForDisplay = (customer: ContextCustomer): CustomerDisplay
 
   return {
     ...customer,
-    phone: (customer as any).phone || '+91 ' + String(random(7000000000, 9999999999)),
+    phone: (customer as ContextCustomer & { phone?: string }).phone || '+91 ' + String(random(7000000000, 9999999999)),
     address: defaultAddress
       ? `${defaultAddress.city}, ${defaultAddress.state}`
       : 'Not specified',
@@ -107,7 +108,8 @@ export default function CustomersTablePage() {
   });
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-    let aValue: any, bValue: any;
+    let aValue: string | number | Date, bValue: string | number | Date;
+
     switch (sortBy) {
       case 'name':
         aValue = a.fullname.toLowerCase();
@@ -839,7 +841,7 @@ export default function CustomersTablePage() {
                       <div className="text-center py-8">
                         <Package className="mx-auto h-12 w-12 text-gray-400" />
                         <h3 className="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
-                        <p className="mt-1 text-sm text-gray-500">This customer hasn't placed any orders yet.</p>
+                        <p className="mt-1 text-sm text-gray-500">This customer hasn&apos;t placed any orders yet.</p>
                       </div>
                     )}
                   </div>

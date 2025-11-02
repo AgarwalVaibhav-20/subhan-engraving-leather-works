@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,10 +24,8 @@ import {
   ArrowUpDown,
   RefreshCw,
   Bell,
-  DollarSign,
   Package,
   Users,
-  TrendingUp,
   Clock,
   AlertTriangle
 } from "lucide-react";
@@ -222,7 +220,7 @@ const RecentActivityPage = () => {
     if (dateRange !== "All") {
       const today = new Date();
       const filterDate = new Date();
-      
+
       switch (dateRange) {
         case "today":
           filterDate.setHours(0, 0, 0, 0);
@@ -263,7 +261,7 @@ const RecentActivityPage = () => {
 
   const getActivityIcon = (type: string, status: string) => {
     const iconProps = { className: "w-5 h-5" };
-    
+
     switch (type) {
       case "payment":
         return <CreditCard {...iconProps} className={`w-5 h-5 ${status === "success" ? "text-green-600" : status === "error" ? "text-red-600" : "text-blue-600"}`} />;
@@ -334,11 +332,11 @@ const RecentActivityPage = () => {
       User: activity.user?.name || '',
       Email: activity.user?.email || ''
     }));
-    
-    const csvContent = "data:text/csv;charset=utf-8," + 
+
+    const csvContent = "data:text/csv;charset=utf-8," +
       Object.keys(csvData[0]).join(",") + "\n" +
       csvData.map(row => Object.values(row).join(",")).join("\n");
-    
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -351,7 +349,7 @@ const RecentActivityPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -387,7 +385,7 @@ const RecentActivityPage = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -403,7 +401,7 @@ const RecentActivityPage = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -419,7 +417,7 @@ const RecentActivityPage = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -439,7 +437,7 @@ const RecentActivityPage = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row gap-4 items-center">
-              
+
               {/* Search */}
               <div className="relative flex-1 min-w-[300px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -565,15 +563,14 @@ const RecentActivityPage = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
                         <div className="flex-shrink-0">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            activity.status === 'success' ? 'bg-green-100' :
-                            activity.status === 'warning' ? 'bg-yellow-100' :
-                            activity.status === 'error' ? 'bg-red-100' : 'bg-blue-100'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.status === 'success' ? 'bg-green-100' :
+                              activity.status === 'warning' ? 'bg-yellow-100' :
+                                activity.status === 'error' ? 'bg-red-100' : 'bg-blue-100'
+                            }`}>
                             {getActivityIcon(activity.type, activity.status)}
                           </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <Badge className={`${getTypeColor(activity.type)} text-xs`}>
@@ -583,17 +580,17 @@ const RecentActivityPage = () => {
                               {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
                             </Badge>
                           </div>
-                          
+
                           <h3 className="text-sm font-medium text-gray-900 mb-1">
                             {activity.message}
                           </h3>
-                          
+
                           {activity.description && (
                             <p className="text-sm text-gray-600 mb-2">
                               {activity.description}
                             </p>
                           )}
-                          
+
                           <div className="flex items-center gap-4 text-xs text-gray-500">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
@@ -612,18 +609,17 @@ const RecentActivityPage = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-3">
                         {activity.amount && (
                           <div className="text-right">
-                            <p className={`text-sm font-semibold ${
-                              activity.type === 'refund' ? 'text-red-600' : 'text-green-600'
-                            }`}>
+                            <p className={`text-sm font-semibold ${activity.type === 'refund' ? 'text-red-600' : 'text-green-600'
+                              }`}>
                               {activity.type === 'refund' ? '-' : '+'}{activity.amount}
                             </p>
                           </div>
                         )}
-                        
+
                         <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
@@ -633,7 +629,7 @@ const RecentActivityPage = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          
+
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -680,7 +676,7 @@ const RecentActivityPage = () => {
             >
               Previous
             </Button>
-            
+
             {[...Array(Math.min(5, totalPages))].map((_, idx) => {
               const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + idx;
               return (
@@ -694,7 +690,7 @@ const RecentActivityPage = () => {
                 </Button>
               );
             })}
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -715,7 +711,7 @@ const RecentActivityPage = () => {
                 Activity Details - {selectedActivity?.id}
               </DialogTitle>
             </DialogHeader>
-            
+
             {selectedActivity && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -732,19 +728,19 @@ const RecentActivityPage = () => {
                     </Badge>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-gray-500">Message</label>
                   <p className="text-sm text-gray-900 mt-1">{selectedActivity.message}</p>
                 </div>
-                
+
                 {selectedActivity.description && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">Description</label>
                     <p className="text-sm text-gray-900 mt-1">{selectedActivity.description}</p>
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500">Date</label>
@@ -755,18 +751,17 @@ const RecentActivityPage = () => {
                     <p className="text-sm text-gray-900 mt-1">{selectedActivity.time}</p>
                   </div>
                 </div>
-                
+
                 {selectedActivity.amount && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">Amount</label>
-                    <p className={`text-sm font-semibold mt-1 ${
-                      selectedActivity.type === 'refund' ? 'text-red-600' : 'text-green-600'
-                    }`}>
+                    <p className={`text-sm font-semibold mt-1 ${selectedActivity.type === 'refund' ? 'text-red-600' : 'text-green-600'
+                      }`}>
                       {selectedActivity.type === 'refund' ? '-' : '+'}{selectedActivity.amount}
                     </p>
                   </div>
                 )}
-                
+
                 {selectedActivity.user && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">User Information</label>
@@ -784,7 +779,7 @@ const RecentActivityPage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {selectedActivity.metadata && Object.keys(selectedActivity.metadata).length > 0 && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">Additional Information</label>
@@ -822,7 +817,7 @@ const RecentActivityPage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <Button variant="outline" onClick={() => setSelectedActivity(null)}>
                     Close

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -28,7 +28,7 @@ import { signInVerification } from '@/schemas/signInSchema'
 type FormData = z.infer<typeof signInVerification>
 
 const LoginPage = () => {
-  const { data: session } = useSession()
+  // const { data: session } = useSession()
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)

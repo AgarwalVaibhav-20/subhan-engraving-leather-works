@@ -1,5 +1,5 @@
 'use client'
-
+import type { AxiosError } from 'axios'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -50,9 +50,11 @@ export default function VerifyPage() {
       setTimeout(() => {
         router.push('/login')
       }, 2000)
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Invalid OTP')
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ message?: string }>
+      toast.error(error.response?.data?.message || 'Invalid OTP')
     }
+
   }
 
   const handleResendOtp = async () => {
@@ -61,8 +63,9 @@ export default function VerifyPage() {
       setResending(true)
       const res = await axios.post('/api/resend', { email })
       toast.success(res.data.message || 'OTP resent successfully!')
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to resend OTP.')
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ message?: string }>
+      toast.error(error.response?.data?.message || 'Failed to resend OTP.')
     } finally {
       setResending(false)
     }
@@ -70,9 +73,9 @@ export default function VerifyPage() {
 
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false}  toastOptions={{
-    duration: 3000,
-  }} />
+      <Toaster position="top-center" reverseOrder={false} toastOptions={{
+        duration: 3000,
+      }} />
 
       <div className="flex items-center justify-center min-h-screen py-8 px-4">
         <Card className="w-full max-w-md shadow-lg p-4">
@@ -112,7 +115,7 @@ export default function VerifyPage() {
             {/* 🔁 Resend OTP */}
             <div className="text-sm text-muted-foreground mt-4 text-center">
               Didn’t get the code?{' '}
-              
+
               <button
                 type="button"
                 className="text-blue-600 underline"
