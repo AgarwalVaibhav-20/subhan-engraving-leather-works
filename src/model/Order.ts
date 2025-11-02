@@ -45,7 +45,7 @@ export interface Order extends Document {
   totalAmount: number;
   status: "pending" | "processing" | "completed" | "cancelled";
   paymentStatus: "unpaid" | "paid" | "refunded";
-  paymentMethod?: "cod" | "card" | "upi" | "netbanking";
+  paymentMethod?: "Cash" | "card" | "upi" | "bank";
   deliveredAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -71,8 +71,8 @@ const OrderSchema = new Schema<Order>(
     },
     paymentMethod: {
       type: String,
-      enum: ["cod", "card", "upi", "netbanking"],
-      default: "cod",
+      enum: ["Cash", "card", "upi", "bank"],
+      default: "Cash",
     },
     deliveredAt: { type: Date },
   },

@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { Search, Filter, Download, Plus, Eye, Edit2, Trash2, Mail, Phone, MapPin, Calendar, ShoppingBag, IndianRupee, X, User, Package, CreditCard, Clock, Star, ChevronLeft, ChevronRight, Save, Cancel } from 'lucide-react';
 import { useCustomers, Customer as ContextCustomer } from "@/context/CustomerProvider";
 
-// Extended interface for display purposes - merges context data with computed fields
 interface CustomerDisplay extends ContextCustomer {
   phone?: string;
   address?: string;
@@ -47,7 +46,7 @@ const generateMockOrders = (customerId: string, orderCount: number): Order[] => 
 // Transform context customer to display customer with computed fields
 const transformCustomerForDisplay = (customer: ContextCustomer): CustomerDisplay => {
   const defaultAddress = customer.addresses?.find(a => a.isDefault) || customer.addresses?.[0];
-  
+
   // Generate consistent random data based on customer ID
   const seed = customer.customerID.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const random = (min: number, max: number) => {
@@ -57,12 +56,12 @@ const transformCustomerForDisplay = (customer: ContextCustomer): CustomerDisplay
 
   const totalOrders = random(1, 50);
   const totalSpent = random(5000, 100000);
-  
+
   return {
     ...customer,
     phone: (customer as any).phone || '+91 ' + String(random(7000000000, 9999999999)),
-    address: defaultAddress 
-      ? `${defaultAddress.city}, ${defaultAddress.state}` 
+    address: defaultAddress
+      ? `${defaultAddress.city}, ${defaultAddress.state}`
       : 'Not specified',
     status: customer.isloggedIn ? 'Active' : customer.isVerified ? 'Inactive' : 'Suspended',
     joinDate: customer.createdAt,
@@ -392,7 +391,7 @@ export default function CustomersTablePage() {
                   <p className="text-sm text-gray-600">Avg Order Value</p>
                   <p className="text-xl font-semibold">
                     {formatCurrency(
-                      customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / 
+                      customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) /
                       Math.max(customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0), 1)
                     )}
                   </p>
@@ -491,8 +490,8 @@ export default function CustomersTablePage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedCustomers.map((customer) => (
-                  <tr 
-                    key={customer.customerID} 
+                  <tr
+                    key={customer.customerID}
                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                     onClick={() => handleCustomerClick(customer)}
                   >
@@ -505,7 +504,7 @@ export default function CustomersTablePage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{customer.fullname}</div>
-                          <div className="text-sm text-gray-500">ID: {customer.customerID.slice(0,10).toUpperCase()}</div>
+                          <div className="text-sm text-gray-500">ID: {customer.customerID.slice(0, 10).toUpperCase()}</div>
                         </div>
                       </div>
                     </td>
@@ -598,8 +597,8 @@ export default function CustomersTablePage() {
               <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No customers found</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || statusFilter !== 'All' 
-                  ? 'Try adjusting your search or filters.' 
+                {searchTerm || statusFilter !== 'All'
+                  ? 'Try adjusting your search or filters.'
                   : 'Get started by adding your first customer.'
                 }
               </p>
@@ -610,14 +609,14 @@ export default function CustomersTablePage() {
           {sortedCustomers.length > 0 && (
             <div className="bg-white px-6 py-4 flex items-center justify-between border-t border-gray-200">
               <div className="flex-1 flex justify-between sm:hidden">
-                <button 
+                <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
-                <button 
+                <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -642,24 +641,23 @@ export default function CustomersTablePage() {
                     >
                       <ChevronLeft size={20} />
                     </button>
-                    
+
                     {generatePageNumbers().map((page, index) => (
                       <button
                         key={index}
                         onClick={() => typeof page === 'number' && handlePageChange(page)}
                         disabled={typeof page !== 'number'}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          page === currentPage
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : typeof page === 'number'
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === currentPage
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : typeof page === 'number'
                             ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                             : 'bg-white text-gray-400 border-gray-300 cursor-default'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
                     ))}
-                    
+
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
@@ -676,17 +674,16 @@ export default function CustomersTablePage() {
       </main>
 
       {/* Sidebar */}
-      <div className={`fixed right-0 top-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
-        sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div className={`fixed right-0 top-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
         {selectedCustomer && (
           <div className="h-full flex flex-col">
             {/* Header */}
             <div className="p-6 bg-gray-50 border-b">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {sidebarMode === 'edit' ? 'Edit Customer' : 
-                   sidebarMode === 'orders' ? 'Customer Orders' : 'Customer Details'}
+                  {sidebarMode === 'edit' ? 'Edit Customer' :
+                    sidebarMode === 'orders' ? 'Customer Orders' : 'Customer Details'}
                 </h2>
                 <button
                   onClick={closeSidebar}
@@ -695,7 +692,7 @@ export default function CustomersTablePage() {
                   <X size={20} />
                 </button>
               </div>
-              
+
               {/* Customer Header */}
               <div className="flex items-center space-x-4">
                 <div className="h-16 w-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-xl">
@@ -724,46 +721,46 @@ export default function CustomersTablePage() {
                     <input
                       type="text"
                       value={editForm.fullname}
-                      onChange={(e) => setEditForm({...editForm, fullname: e.target.value})}
+                      onChange={(e) => setEditForm({ ...editForm, fullname: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
                       value={editForm.email}
-                      onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                     <input
                       type="tel"
                       value={editForm.phone || ''}
-                      onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
                     <textarea
                       value={editForm.address || ''}
-                      onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                     <select
                       value={editForm.status || 'Active'}
-                      onChange={(e) => setEditForm({...editForm, status: e.target.value as Customer['status']})}
+                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value as Customer['status'] })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="Active">Active</option>
@@ -771,12 +768,12 @@ export default function CustomersTablePage() {
                       <option value="Suspended">Suspended</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Payment</label>
                     <select
                       value={editForm.preferredPayment || 'Credit Card'}
-                      onChange={(e) => setEditForm({...editForm, preferredPayment: e.target.value})}
+                      onChange={(e) => setEditForm({ ...editForm, preferredPayment: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="Credit Card">Credit Card</option>
@@ -983,28 +980,28 @@ export default function CustomersTablePage() {
 
                   {/* Actions */}
                   <div className="space-y-3">
-                    <button 
+                    <button
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 font-medium"
                       onClick={() => handleEditCustomer(selectedCustomer)}
                     >
                       <Edit2 size={18} />
                       <span>Edit Customer</span>
                     </button>
-                    <button 
+                    <button
                       className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 font-medium"
                       onClick={() => alert(`Sending email to ${selectedCustomer.email}`)}
                     >
                       <Mail size={18} />
                       <span>Send Email</span>
                     </button>
-                    <button 
+                    <button
                       className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 font-medium"
                       onClick={() => handleViewOrders(selectedCustomer)}
                     >
                       <Package size={18} />
                       <span>View Orders</span>
                     </button>
-                    <button 
+                    <button
                       className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 font-medium"
                       onClick={() => handleDeleteCustomer(selectedCustomer)}
                     >
@@ -1021,7 +1018,7 @@ export default function CustomersTablePage() {
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0  bg-opacity-50 z-40"
           onClick={closeSidebar}
         />

@@ -6,9 +6,14 @@ import { useAuth } from "@/context/UserContext";
 type Transaction = {
     _id?: string;
     amount: number;
-    type: "credit" | "debit";
-    description: string;
     date: string;
+    customerName: string;
+    email: string;
+    paymentMethod?: "Cash" | "Online";
+    address: string;
+    items: number;
+    status?: "pending" | "completed" | "failed";
+    products?: IProduct[];
 };
 
 type TransactionContextType = {

@@ -10,8 +10,10 @@ export async function PUT(
   await dbConnect();
 
   try {
-    const { id } = params;
+    // FIX: Await the request body *before* accessing params.
+    // This satisfies the Next.js runtime.
     const body = await req.json();
+    const { id } =await params;
 
     if (!id) {
       return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
@@ -40,7 +42,7 @@ export async function PUT(
     await order.save();
 
     return NextResponse.json(
-      { message: "Order updated successfully", order },
+      { message: "Order updated successfully", order: order }, // Return the updated order
       { status: 200 }
     );
   } catch (error) {
@@ -60,6 +62,10 @@ export async function DELETE(
   await dbConnect();
 
   try {
+    // FIX: Even if there is no body, we must "touch" the request
+    // to unlock params. Calling .text() is a harmless way to do this.
+    await req.text(); 
+    
     const { id } = params;
 
     if (!id) {

@@ -710,7 +710,7 @@ const filteredOrders = filter === "All"
       <RecentCustomers />
     </div>
 
-        <Card className="bg-white">
+        <Card className="bg-white p-4">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">All Customer Details</CardTitle>
           </CardHeader>

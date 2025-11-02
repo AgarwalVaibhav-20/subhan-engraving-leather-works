@@ -656,11 +656,11 @@ const categoriesData = [
 ];
 
 const projectsData = [
-    { name: "Opulento", image: "/productPhotos/rider.png" },
-    { name: "Torecelli", image: "/productPhotos/berunni3.png" },
-    { name: "Platinum", image: "/productPhotos/horse.png" },
-    { name: "Opla", image: "/productPhotos/logos.jpg" },
-    { name: "Trecip", image: "/productPhotos/drilldown.jpeg" },
+    { name: "Metal Logos", image: "/productPhotos/rider.png" },
+    { name: "Rubber Logos", image: "/productPhotos/berunni3.png" },
+    { name: "Toys", image: "/productPhotos/horse.png" },
+    { name: "Dog's Accesories", image: "/productPhotos/logos.jpg" },
+    // { name: "Trecip", image: "/productPhotos/drilldown.jpeg" },
 ];
 
 const craftsmanshipSteps = [

@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useDashboard } from "@/context/DashboardContext";
+import { useTransaction } from "@/context/TransactionContext";
 import {
   Search,
   Eye,
@@ -52,9 +53,9 @@ const statusIcons: { [key: string]: React.ElementType } = {
 };
 
 export default function AdminOrderDashboard() {
-  
+  const { addTransaction } = useTransaction();
   const { stats, loading, error: er, refreshStats } = useDashboard();
-  console.log("stats" , stats)
+  console.log("stats", stats)
 
   if (loading) return <div role="status" className='flex justify-center items-center h-screen'>
     <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -119,11 +120,53 @@ export default function AdminOrderDashboard() {
   const currentOrders = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
-  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
-    await updateOrder(orderId, { status: newStatus });
-    toast.success("✅ Order status updated successfully!");
-    await fetchOrders()
+  const handleStatusChange = async (order: Order, newStatus: Order['status']) => {
+    const prevStatus = order.status; // keep original before updating
+
+    try {
+      await updateOrder(order._id, { status: newStatus });
+      toast.success("✅ Order status updated successfully!");
+
+      // Only create transaction if moving from pending → completed
+      if (prevStatus === 'pending' && newStatus === 'completed') {
+        const customerName = order.customerName || 'Guest';
+        const email = order.email || 'unknown@example.com';
+        const address = [
+          order.address?.street,
+          order.address?.apartment,
+          order.address?.city,
+          order.address?.state,
+          order.address?.zipcode
+        ].filter(Boolean).join(', ');
+
+        const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+        const paymentMethod = order.paymentMethod || 'Online';
+
+        const newTransaction = {
+          customerName,
+          email,
+          amount: order.totalAmount,
+          status: 'pending',
+          paymentMethod,
+          address,
+          items: totalItems,
+          date: new Date().toISOString(),
+          type: "credit",
+          description: `From Order ${order._id}`
+        };
+
+        console.log("Creating transaction:", newTransaction);
+        await addTransaction(newTransaction);
+        toast.success("🧾 Transaction created successfully!");
+      }
+
+      await fetchOrders();
+    } catch (err) {
+      console.error("Error during status change or transaction creation:", err);
+      toast.error("❌ An error occurred. Please try again.");
+    }
   };
+
 
   const handleDeleteOrder = async (orderId: string) => {
     const confirmDelete = window.confirm(
@@ -417,9 +460,8 @@ export default function AdminOrderDashboard() {
                           <button onClick={() => openOrderModal(order)} className="text-blue-600 hover:text-blue-900"><Eye className="h-4 w-4" /></button>
                           <select
                             value={order.status}
-                            onChange={(e) => handleStatusChange(order._id, e.target.value as Order['status'])}
-                            className="text-xs border-gray-300 rounded px-2 py-1"
-                          >
+                            onChange={(e) => handleStatusChange(order, e.target.value as Order['status'])}
+                            className="text-xs border-gray-300 rounded px-2 py-1">
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
                             <option value="completed">Completed</option>

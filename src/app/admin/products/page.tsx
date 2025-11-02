@@ -79,11 +79,10 @@ const ProductsPage: React.FC = () => {
   });
 
   const categories: string[] = [
-    "Electronics",
-    "Wearables",
-    "Photography",
-    "Gaming",
-    "Accessories",
+    "Metal",
+    "Rubber",
+    "Wood",
+    "Toys",
   ];
 
   const statuses = [

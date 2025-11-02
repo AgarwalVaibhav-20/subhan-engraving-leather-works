@@ -11,6 +11,7 @@ export interface IProduct extends Document {
   category: string;
   brand: string;
   inStock: number;
+  isActive: true;
   isFeatured?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -60,10 +61,14 @@ const productSchema = new Schema<IProduct>(
         message: "At least one image is required!",
       },
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     category: {
       type: String,
       enum: {
-        values: ["Rubber", "Metal", "Wood" , "Toys"],
+        values: ["Rubber", "Metal", "Wood", "Toys"],
         message: "{VALUE} is not a valid category!",
       },
       required: [true, "Please provide a category!"],

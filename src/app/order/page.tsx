@@ -24,7 +24,7 @@ export default function OrderPage() {
     phone: "",
     contactTime: "",
     specialInstructions: "",
-    paymentMethod: "cod",
+    paymentMethod: "Cash",
     saveInfo: false,
     newsletter: false,
   });
@@ -660,13 +660,13 @@ export default function OrderPage() {
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="cod"
-                      checked={formData.paymentMethod === "cod"}
+                      value="Cash"
+                      checked={formData.paymentMethod === "Cash"}
                       onChange={handleInputChange}
                       className="w-5 h-5 text-blue-600"
                     />
                     <div className="ml-3 flex-1">
-                      <span className="font-semibold">Cash on Delivery</span>
+                      <span className="font-semibold">Cash</span>
                       <p className="text-sm text-gray-500">Pay when you receive your order</p>
                     </div>
                   </label>
@@ -844,7 +844,7 @@ export default function OrderPage() {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Payment Method:</span>
                     <span className="font-medium">
-                      {formData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer'}
+                      {formData.paymentMethod === 'Cash' ? 'Cash on Delivery' : 'Online'}
                     </span>
                   </div>
                   <div className="flex justify-between">
