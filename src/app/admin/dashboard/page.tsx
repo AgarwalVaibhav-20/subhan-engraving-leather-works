@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import ActivityFeed from '../components/Activity'
-import RecentCustomers from '../components/RecentCustomer'
+// import RecentCustomers from '../components/RecentCustomer'
 import { Calendar } from "@/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -707,7 +707,7 @@ const filteredOrders = filter === "All"
         {/* Activity Feed and Recent Customers */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <ActivityFeed />
-      <RecentCustomers />
+      {/* <RecentCustomers /> */}
     </div>
 
         <Card className="bg-white p-4">
