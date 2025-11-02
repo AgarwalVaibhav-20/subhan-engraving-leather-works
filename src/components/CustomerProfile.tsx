@@ -130,7 +130,7 @@ const CustomerProfile = () => {
     const id = Date.now();
     const notification = { id, message, type };
     setNotifications(prev => [...prev, notification]);
-    
+
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 3000);
@@ -173,16 +173,16 @@ const CustomerProfile = () => {
         id: Date.now(),
         ...addressForm
       };
-      
+
       let updatedAddresses = [...addresses, newAddress];
-      
+
       // If this is set as default, remove default from others
       if (newAddress.isDefault) {
-        updatedAddresses = updatedAddresses.map(addr => 
+        updatedAddresses = updatedAddresses.map(addr =>
           addr.id === newAddress.id ? addr : { ...addr, isDefault: false }
         );
       }
-      
+
       setAddresses(updatedAddresses);
       setAddressForm({
         type: '',
@@ -204,17 +204,17 @@ const CustomerProfile = () => {
   };
 
   const handleUpdateAddress = () => {
-    let updatedAddresses = addresses.map(addr => 
+    let updatedAddresses = addresses.map(addr =>
       addr.id === editingAddress ? { ...addressForm } : addr
     );
-    
+
     // If this is set as default, remove default from others
     if (addressForm.isDefault) {
-      updatedAddresses = updatedAddresses.map(addr => 
+      updatedAddresses = updatedAddresses.map(addr =>
         addr.id === editingAddress ? addr : { ...addr, isDefault: false }
       );
     }
-    
+
     setAddresses(updatedAddresses);
     setEditingAddress(null);
     setAddressForm({
@@ -254,8 +254,8 @@ const CustomerProfile = () => {
   const addToCart = (item) => {
     const existingItem = cart.find(cartItem => cartItem.id === item.id);
     if (existingItem) {
-      setCart(cart.map(cartItem => 
-        cartItem.id === item.id 
+      setCart(cart.map(cartItem =>
+        cartItem.id === item.id
           ? { ...cartItem, quantity: cartItem.quantity + 1 }
           : cartItem
       ));
@@ -295,9 +295,8 @@ const CustomerProfile = () => {
         {notifications.map((notification) => (
           <div
             key={notification.id}
-            className={`px-4 py-2 rounded-lg shadow-lg ${
-              notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-            }`}
+            className={`px-4 py-2 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+              }`}
           >
             <div className="flex items-center space-x-2">
               <Check size={16} />
@@ -337,7 +336,7 @@ const CustomerProfile = () => {
                     <input
                       type="text"
                       value={editedProfile.name}
-                      onChange={(e) => setEditedProfile({...editedProfile, name: e.target.value})}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
                       className="text-2xl font-bold text-gray-900 border-b-2 border-blue-500 bg-transparent outline-none"
                     />
                     <div className="flex gap-2">
@@ -352,25 +351,28 @@ const CustomerProfile = () => {
                   <input
                     type="email"
                     value={editedProfile.email}
-                    onChange={(e) => setEditedProfile({...editedProfile, email: e.target.value})}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
                     className="block w-full text-gray-600 border-b border-gray-300 bg-transparent outline-none focus:border-blue-500"
                   />
                   <input
                     type="tel"
                     value={editedProfile.phone}
-                    onChange={(e) => setEditedProfile({...editedProfile, phone: e.target.value})}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
                     className="block w-full text-gray-600 border-b border-gray-300 bg-transparent outline-none focus:border-blue-500"
                   />
                 </div>
               ) : (
                 <div>
                   <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
-                    {customer.map((-))}
                     <h1 className="text-2xl font-bold text-gray-900">{customer.name}</h1>
-                    <button onClick={handleEditProfile} className="text-blue-600 hover:text-blue-700 w-fit mx-auto md:mx-0">
+                    <button
+                      onClick={handleEditProfile}
+                      className="text-blue-600 hover:text-blue-700 w-fit mx-auto md:mx-0"
+                    >
                       <Edit size={18} />
                     </button>
                   </div>
+
                   <p className="text-gray-600 mb-1">{customer.email}</p>
                   <p className="text-gray-600 mb-2">{customer.phone}</p>
                   <p className="text-sm text-gray-500">Member since {customer.joinDate}</p>
@@ -408,11 +410,10 @@ const CustomerProfile = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
+                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <tab.icon size={18} />
                   <span>{tab.label}</span>
@@ -449,7 +450,7 @@ const CustomerProfile = () => {
                           {order.status}
                         </span>
                         <span className="font-semibold text-gray-900">${order.total}</span>
-                        <button 
+                        <button
                           onClick={() => viewOrderDetails(order)}
                           className="text-blue-600 hover:text-blue-700"
                         >
@@ -467,7 +468,7 @@ const CustomerProfile = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900">Saved Addresses</h2>
-                  <button 
+                  <button
                     onClick={() => setShowAddAddress(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
                   >
@@ -487,42 +488,42 @@ const CustomerProfile = () => {
                         type="text"
                         placeholder="Address Type (Home, Office, etc.)"
                         value={addressForm.type}
-                        onChange={(e) => setAddressForm({...addressForm, type: e.target.value})}
+                        onChange={(e) => setAddressForm({ ...addressForm, type: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                       />
                       <input
                         type="text"
                         placeholder="Street Address"
                         value={addressForm.street}
-                        onChange={(e) => setAddressForm({...addressForm, street: e.target.value})}
+                        onChange={(e) => setAddressForm({ ...addressForm, street: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                       />
                       <input
                         type="text"
                         placeholder="City"
                         value={addressForm.city}
-                        onChange={(e) => setAddressForm({...addressForm, city: e.target.value})}
+                        onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                       />
                       <input
                         type="text"
                         placeholder="State"
                         value={addressForm.state}
-                        onChange={(e) => setAddressForm({...addressForm, state: e.target.value})}
+                        onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                       />
                       <input
                         type="text"
                         placeholder="ZIP Code"
                         value={addressForm.zipCode}
-                        onChange={(e) => setAddressForm({...addressForm, zipCode: e.target.value})}
+                        onChange={(e) => setAddressForm({ ...addressForm, zipCode: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                       />
                       <input
                         type="text"
                         placeholder="Country"
                         value={addressForm.country}
-                        onChange={(e) => setAddressForm({...addressForm, country: e.target.value})}
+                        onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                       />
                     </div>
@@ -531,7 +532,7 @@ const CustomerProfile = () => {
                         type="checkbox"
                         id="isDefault"
                         checked={addressForm.isDefault}
-                        onChange={(e) => setAddressForm({...addressForm, isDefault: e.target.checked})}
+                        onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
                         className="rounded"
                       />
                       <label htmlFor="isDefault" className="text-sm text-gray-600">
@@ -587,13 +588,13 @@ const CustomerProfile = () => {
                       </div>
                       <div className="flex flex-col space-y-2">
                         <div className="flex space-x-2">
-                          <button 
+                          <button
                             onClick={() => handleEditAddress(address)}
                             className="text-blue-600 hover:text-blue-700"
                           >
                             <Edit size={18} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteAddress(address.id)}
                             className="text-red-600 hover:text-red-700"
                           >
@@ -643,11 +644,10 @@ const CustomerProfile = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => moveToCart(item)}
-                          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-1 ${
-                            item.inStock
+                          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-1 ${item.inStock
                               ? 'bg-blue-600 text-white hover:bg-blue-700'
                               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          }`}
+                            }`}
                           disabled={!item.inStock}
                         >
                           <ShoppingCart size={14} />
