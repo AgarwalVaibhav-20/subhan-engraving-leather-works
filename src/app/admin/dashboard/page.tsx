@@ -16,7 +16,6 @@ import {
   Bell,
   Search,
   Download,
-  EllipsisVertical,
   TrendingUp,
   TrendingDown,
   Package,
@@ -28,14 +27,10 @@ import {
   CreditCard,
   Star,
   AlertCircle,
-  CheckCircle,
-  XCircle,
   Eye,
   Filter,
-  MoreHorizontal,
 } from "lucide-react";
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -59,14 +54,9 @@ import {
 } from "@/components/ui/card";
 
 const Page = () => {
-  const { stats, loading, error, refreshStats } = useDashboard();
+  const { stats, loading, error } = useDashboard();
   console.log("Dashboard stats:", stats);
   console.log(" stats",stats?.totalRevenue || 0, stats?.cancelledOrders , stats?.totalOrders)
-
-
-  if (loading) return <p>Loading dashboard stats...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!stats) return <p>No stats available</p>;
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [customers, setCustomers] = useState([ 
     { name: "Ravi Sharma", email: "ravi@example.com", phone: "9876543210", address: "Delhi, India" },
@@ -194,7 +184,10 @@ const Page = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-
+  
+  if (loading) return <p>Loading dashboard stats...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!stats) return <p>No stats available</p>;
   const filteredCustomers = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

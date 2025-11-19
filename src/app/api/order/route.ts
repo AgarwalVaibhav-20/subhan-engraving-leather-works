@@ -13,8 +13,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { userId, items, address, totalAmount, saveInfo } = body;
 
-    // Validation
-    if (!userId || !items || !Array.isArray(items) || items.length === 0) {
+    if (!userId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "Invalid order data: userId and items are required" },
         { status: 400 }
@@ -22,56 +21,47 @@ export async function POST(req: NextRequest) {
     }
 
     if (
-      !address ||
-      !address.street ||
-      !address.city ||
-      !address.state ||
-      !address.zipcode
+      !address?.street ||
+      !address?.city ||
+      !address?.state ||
+      !address?.zipcode
     ) {
       return NextResponse.json(
-        {
-          error: "Complete address is required (street, city, state, zipcode)",
-        },
+        { error: "Complete address is required" },
         { status: 400 }
       );
     }
 
-    // Find user
     const user = await UserModel.findById(userId);
-    if (!user) {
+    if (!user)
       return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
 
-    // Save address to user profile if saveInfo = true
     if (saveInfo) {
-      const addressExists = user.addresses?.some(
-        (addr: any) =>
-          addr.street === address.street &&
-          addr.city === address.city &&
-          addr.zipcode === address.zipcode
+      const exists = user.addresses?.some(
+        (a: any) =>
+          a.street === address.street &&
+          a.city === address.city &&
+          a.zipcode === address.zipcode
       );
-
-      if (!addressExists) {
+      if (!exists) {
         user.addresses = user.addresses || [];
-        user.addresses.push({
-          street: address.street,
-          apartment: address.apartment || "",
-          city: address.city,
-          state: address.state,
-          zipcode: address.zipcode,
-          country: address.country || "IN",
-        });
+        user.addresses.push({ ...address, country: address.country || "IN" });
         await user.save();
       }
     }
 
     // Create order
+    const calculatedTotal = items.reduce(
+      (sum: number, item: any) => sum + item.price * item.quantity,
+      0
+    );
+
     const newOrder = await OrderModel.create({
       user: user._id,
       customerName: user.fullname,
       email: user.email,
       items: items.map((item: any) => ({
-        id: new mongoose.Types.ObjectId(item.productId),
+        id: new mongoose.Types.ObjectId(item.productId || item.id),
         name: item.name,
         price: item.price,
         quantity: item.quantity,
@@ -84,7 +74,7 @@ export async function POST(req: NextRequest) {
         zipcode: address.zipcode,
         country: address.country || "IN",
       },
-      totalAmount,
+      totalAmount: totalAmount || calculatedTotal,
       status: "pending",
       paymentStatus: "unpaid",
     });

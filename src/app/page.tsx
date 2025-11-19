@@ -841,14 +841,14 @@ export default function Page() {
                     >
                         Custom Metal, Leather, and Rubber Emblems Crafted with Precision and Passion.
                     </motion.p>
-                    <Link href="/product">
+                    <Link href="/product/MetalLogo" >
                         <motion.button
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 1.8 }}
                             whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px rgba(245, 158, 11, 0.5)" }}
                             whileTap={{ scale: 0.95 }}
-                            className="mt-8 bg-amber-500 text-zinc-900 font-bold font-body py-3 px-8 rounded-sm uppercase tracking-wide inline-flex items-center gap-2"
+                            className="mt-8 bg-amber-500 cursor-pointer text-zinc-900 font-bold font-body py-3 px-8 rounded-sm uppercase tracking-wide inline-flex items-center gap-2"
                         >
                             Explore Collection <ArrowRight size={20} />
                         </motion.button>

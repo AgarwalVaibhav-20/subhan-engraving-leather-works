@@ -29,7 +29,7 @@ export default function ProductViewPage() {
   const [product, setProduct] = useState<ProductType | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
-
+  const [selectedPieces, setSelectedPieces] = useState<number>(500);
   useEffect(() => {
     if (id) {
       axios

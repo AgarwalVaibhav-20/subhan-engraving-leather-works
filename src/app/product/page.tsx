@@ -34,10 +34,12 @@ export default function Product() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get("/api/product");
-        setProducts(res.data);
-        setSkeletonCount(res.data.length);
+        console.log("Fetched products:", res.data);
+        setProducts(res.data.products); // ✅ correct field
+        setSkeletonCount(res.data.products.length);
       } catch (error) {
         console.error("Failed to fetch products", error);
+        setProducts([]); // prevent map crash
       } finally {
         setLoading(false);
       }
@@ -45,6 +47,7 @@ export default function Product() {
 
     fetchProducts();
   }, []);
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4 h-full">
@@ -113,11 +116,10 @@ export default function Product() {
                       ₹ {product.price}
                     </span>
                     <span
-                      className={`text-sm px-2 py-1 rounded-full ${
-                        product.inStock > 0
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-600"
-                      }`}
+                      className={`text-sm px-2 py-1 rounded-full ${product.inStock > 0
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
+                        }`}
                     >
                       {product.inStock > 0 ? "In Stock" : "Out of Stock"}
                     </span>
@@ -126,82 +128,82 @@ export default function Product() {
 
                 {/* Button Row at Bottom */}
                 <div className="flex justify-between items-center  md:flex-col md:gap-4">
-                 {user?.role ==="admin" ? <>
-                 <Button
-                    className="md:w-full" disabled
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addToCart({
-                        id: product.productID,
-                        name: product.name,
-                        price: product.price,
-                        images: product.images,
-                        quantity: 1,
-                      });
-                      toast.success("Adding in your Cart");
-                    }}
-                  >
-                    <ShoppingCart className="mr-1" />
-                    Add to Cart
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="md:w-full" disabled
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addToWishlist({
-                        id: product.productID,
-                        name: product.name,
-                        price: product.price,
-                        images: product.images,
-                        quantity: 1,
-                      });
-                      toast.success("Adding in your Wishlist");
-                    }}
-                  >
-                    <Heart className="mr-1" />
-                    Wishlist
-                  </Button>
-                 </>  : <>
-                 <Button
-                    className="md:w-full" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addToCart({
-                        id: product.productID,
-                        name: product.name,
-                        price: product.price,
-                        images: product.images,
-                        quantity: 1,
-                      });
-                      toast.success("Adding in your Cart");
-                    }}
-                  >
-                    <ShoppingCart className="mr-1" />
-                    Add to Cart
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="md:w-full"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addToWishlist({
-                        id: product.productID,
-                        name: product.name,
-                        price: product.price,
-                        images: product.images,
-                        quantity: 1,
-                      });
-                      toast.success("Adding in your Wishlist");
-                    }}
-                  >
-                    <Heart className="mr-1" />
-                    Wishlist
-                  </Button></>}
+                  {user?.role === "admin" ? <>
+                    <Button
+                      className="md:w-full" disabled
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addToCart({
+                          id: product.productID,
+                          name: product.name,
+                          price: product.price,
+                          images: product.images,
+                          quantity: 1,
+                        });
+                        toast.success("Adding in your Cart");
+                      }}
+                    >
+                      <ShoppingCart className="mr-1" />
+                      Add to Cart
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="md:w-full" disabled
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addToWishlist({
+                          id: product.productID,
+                          name: product.name,
+                          price: product.price,
+                          images: product.images,
+                          quantity: 1,
+                        });
+                        toast.success("Adding in your Wishlist");
+                      }}
+                    >
+                      <Heart className="mr-1" />
+                      Wishlist
+                    </Button>
+                  </> : <>
+                    <Button
+                      className="md:w-full"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addToCart({
+                          id: product.productID,
+                          name: product.name,
+                          price: product.price,
+                          images: product.images,
+                          quantity: 1,
+                        });
+                        toast.success("Adding in your Cart");
+                      }}
+                    >
+                      <ShoppingCart className="mr-1" />
+                      Add to Cart
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="md:w-full"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addToWishlist({
+                          id: product.productID,
+                          name: product.name,
+                          price: product.price,
+                          images: product.images,
+                          quantity: 1,
+                        });
+                        toast.success("Adding in your Wishlist");
+                      }}
+                    >
+                      <Heart className="mr-1" />
+                      Wishlist
+                    </Button></>}
                 </div>
               </Card>
               {/* Mobile view */}

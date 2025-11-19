@@ -36,6 +36,7 @@ export default function OrderPage() {
   const [discount, setDiscount] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
+  
 
   useEffect(() => {
     if (user?.email && !formData.email) {
@@ -108,7 +109,7 @@ export default function OrderPage() {
   const shipping = subtotal > 100 ? 0 : 9.99;
   const discountAmount = (subtotal * discount) / 100;
   const tax = (subtotal - discountAmount) * 0.08;
-  const total = subtotal - discountAmount + shipping + tax;
+  const total = subtotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -353,7 +354,7 @@ export default function OrderPage() {
               <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-24">
                 <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
                 
-                <div className="mb-4 p-4 bg-green-50 rounded-lg">
+                {/* <div className="mb-4 p-4 bg-green-50 rounded-lg">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Promo Code
                   </label>
@@ -380,7 +381,7 @@ export default function OrderPage() {
                       Promo code applied!
                     </p>
                   )}
-                </div>
+                </div> */}
 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
@@ -404,8 +405,8 @@ export default function OrderPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax (8%)</span>
-                    <span className="font-medium">₹{tax.toFixed(2)}</span>
+                    <span className="text-gray-600">Tax (free)</span>
+                    <span className="font-medium">₹ 0.00</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between">
                     <span className="text-xl font-bold">Total</span>
@@ -764,8 +765,8 @@ export default function OrderPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax (8%)</span>
-                    <span className="font-medium">₹{tax.toFixed(2)}</span>
+                    <span className="text-gray-600">Tax (free)</span>
+                    <span className="font-medium">₹ 0.00</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between">
                     <span className="text-xl font-bold">Total</span>
